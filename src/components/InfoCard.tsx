@@ -17,9 +17,10 @@ import { GeoResponse, getCountryFlagEmoji } from '../types';
 interface InfoCardProps {
   data: GeoResponse;
   onCopy: (text: string, label: string) => void;
+  isLoading?: boolean;
 }
 
-export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
+export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy, isLoading }) => {
   const [copiedField, setCopiedField] = useState<string | null>(null);
   const [localTime, setLocalTime] = useState<string>('');
 
@@ -61,6 +62,12 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
           <div className="text-xs font-black uppercase text-black dark:text-white tracking-wider flex items-center gap-1.5 mb-1">
             <Globe2 className="w-4 h-4 shrink-0" />
             RESOLVED TARGET QUERY IP
+            {isLoading && (
+              <span className="bg-[#FFE600] dark:bg-[#CCB800] text-black border border-black text-[10px] px-1.5 py-0.5 font-mono animate-pulse flex items-center gap-1">
+                <div className="w-2 h-2 border-2 border-black border-t-transparent rounded-full animate-spin" />
+                UPDATING
+              </span>
+            )}
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <span className="text-xl sm:text-2xl md:text-3xl font-mono font-black text-black dark:text-white break-all">

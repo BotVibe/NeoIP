@@ -19,14 +19,15 @@ This project is a full-stack IP Geolocation web service and API developed with E
 ## 🏗️ Architecture Overview
 
 - **`server.ts`**: Express backend server running on port `3000` (host `0.0.0.0`).
+  - Implements production-grade security and optimization (`helmet` for headers, `compression` for gzipping, `express-rate-limit` for DDoS prevention).
   - Handles `/api`, `/json`, `/api/:query`, `/json/:query` endpoints.
   - Proxies geolocation requests to `ip-api.com` with a fallback mechanism to `ipwho.is` and in-memory TTL caching.
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
 - **`index.html`**: Entry html file with custom Neo-brutalist SVG favicon (`/public/favicon.svg`), Open Graph, Twitter Cards, theme color, and JSON-LD WebApplication structured data.
-- **`src/App.tsx`**: Single-page application rendering the Neo-brutalist dashboard with a centered GitHub repository link (`https://github.com/BotVibe/neo-ip`) in the footer and a collapsible Developer Tools section (hidden by default).
+- **`src/App.tsx`**: Single-page application rendering the Neo-brutalist dashboard with zero-layout-shift loading state (fixed skeleton loader & non-intrusive header progress bar), dimmed dark mode palette, a centered GitHub repository link (`https://github.com/BotVibe/neo-ip`) in the footer, and a collapsible Developer Tools section (hidden by default).
 - **`src/components/`**:
-  - `Header.tsx`: Title banner, caller IP lookup trigger, and search bar (mobile touch optimized, quick presets removed).
-  - `InfoCard.tsx`: Formatted geolocation details with single-click copy buttons and responsive text wrapping.
+  - `Header.tsx`: Title banner, caller IP lookup trigger, search bar, and integrated non-shifting bottom progress bar loader.
+  - `InfoCard.tsx`: Formatted geolocation details with single-click copy buttons, updating indicator pill, and dimmed dark-mode badges.
   - `MapComponent.tsx`: Leaflet interactive map with custom Neo-brutalist marker.
   - `TabsSection.tsx`: Raw JSON viewer, multilingual code snippet generator, and interactive field tester with touch-friendly controls (toggled on-demand).
 

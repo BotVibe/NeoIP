@@ -24,7 +24,7 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header className="w-full bg-[#FFE600] dark:bg-[#CCB800] border-b-4 border-black p-4 sm:p-5 md:p-6 shadow-[0px_4px_0px_0px_#000] transition-colors duration-200">
+    <header className="relative w-full bg-[#FFE600] dark:bg-[#CCB800] border-b-4 border-black p-4 sm:p-5 md:p-6 shadow-[0px_4px_0px_0px_#000] transition-colors duration-200">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-5">
         {/* Top Title & Action Buttons */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -96,6 +96,13 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
         </form>
       </div>
+
+      {/* Non-shifting Bottom Progress Bar */}
+      {isLoading && (
+        <div className="absolute bottom-0 left-0 right-0 h-1.5 bg-black/20 overflow-hidden z-20">
+          <div className="h-full bg-[#FF007A] dark:bg-[#CC0062] animate-pulse w-full" />
+        </div>
+      )}
     </header>
   );
 };

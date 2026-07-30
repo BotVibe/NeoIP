@@ -1,9 +1,34 @@
 import express, { Request, Response } from 'express';
 import path from 'path';
 import { createServer as createViteServer } from 'vite';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 const PORT = 3000;
+
+// Trust the proxy to get correct client IP behind load balancers (like Cloud Run)
+app.set('trust proxy', 1);
+
+// Apply security headers
+app.use(helmet({
+  contentSecurityPolicy: false, // Disabled for Vite HMR and our UI
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" } // Allow external sites to use our API
+}));
+
+// Compress responses
+app.use(compression());
+
+// Apply rate limiting to API routes
+const apiLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 300, // Limit each IP to 300 requests per windowMs
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { status: 'fail', message: 'Too many requests, please try again later.' }
+});
 
 // Enable CORS
 app.use((req, res, next) => {
@@ -170,14 +195,14 @@ async function handleApiRequest(req: Request, res: Response) {
 }
 
 // Routes
-app.get('/api', handleApiRequest);
-app.get('/api/json', handleApiRequest);
-app.get('/json', handleApiRequest);
-app.get('/api/json/:query', handleApiRequest);
-app.get('/api/:query', handleApiRequest);
-app.get('/json/:query', handleApiRequest);
+app.get('/api', apiLimiter, handleApiRequest);
+app.get('/api/json', apiLimiter, handleApiRequest);
+app.get('/json', apiLimiter, handleApiRequest);
+app.get('/api/json/:query', apiLimiter, handleApiRequest);
+app.get('/api/:query', apiLimiter, handleApiRequest);
+app.get('/json/:query', apiLimiter, handleApiRequest);
 
-app.get('/api/client-info', (req, res) => {
+app.get('/api/client-info', apiLimiter, (req, res) => {
   res.json({
     clientIp: getClientIp(req),
     headers: {

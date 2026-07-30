@@ -154,19 +154,28 @@ export default function App() {
 
       {/* Main Dashboard Content */}
       <main className="max-w-7xl mx-auto w-full px-4 md:px-6 pt-6 flex-1 space-y-6">
-        {/* Loading Indicator */}
-        {isLoading && (
-          <div className="neo-box bg-[#FFE600] dark:bg-[#CCB800] text-black p-4 text-center font-black uppercase text-sm flex items-center justify-center gap-2">
-            <div className="w-4 h-4 border-3 border-black border-t-transparent rounded-full animate-spin" />
-            FETCHING IP GEOLOCATION INFORMATION FOR {currentQuery || 'CURRENT IP'}...
+        {!geoData && isLoading ? (
+          /* Initial Load Skeleton - Zero Layout Shift */
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-pulse">
+            <div className="lg:col-span-7 space-y-4">
+              <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-24 p-4 flex flex-col justify-between" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-28" />
+                <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-28" />
+                <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-32" />
+                <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-32" />
+                <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-28 sm:col-span-2" />
+              </div>
+            </div>
+            <div className="lg:col-span-5">
+              <div className="neo-box bg-gray-200 dark:bg-[#1A1A1A] h-[380px]" />
+            </div>
           </div>
-        )}
-
-        {geoData && (
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        ) : geoData ? (
+          <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 items-start transition-opacity duration-200 ${isLoading ? 'opacity-75 pointer-events-none' : 'opacity-100'}`}>
             {/* Left Column: Key Metadata Cards (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
-              <InfoCard data={geoData} onCopy={handleCopy} />
+              <InfoCard data={geoData} onCopy={handleCopy} isLoading={isLoading} />
             </div>
 
             {/* Right Column: Live Map (5 cols) */}
@@ -216,7 +225,7 @@ export default function App() {
               )}
             </div>
           </div>
-        )}
+        ) : null}
       </main>
 
       {/* Toast Notification */}
