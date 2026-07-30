@@ -14,6 +14,8 @@ import {
   ChevronDown,
   ChevronUp,
   Code2,
+  Moon,
+  Sun,
 } from 'lucide-react';
 
 export default function App() {
@@ -22,6 +24,24 @@ export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showDevTools, setShowDevTools] = useState<boolean>(false);
+  
+  const [isDark, setIsDark] = useState<boolean>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('theme') === 'dark' ||
+        (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    }
+    return false;
+  });
+
+  useEffect(() => {
+    if (isDark) {
+      document.documentElement.classList.add('dark');
+      localStorage.setItem('theme', 'dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+      localStorage.setItem('theme', 'light');
+    }
+  }, [isDark]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -89,7 +109,7 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#FFFDF5] text-black font-sans pb-16 flex flex-col">
+    <div className="min-h-screen bg-[#FFFDF5] dark:bg-[#121212] text-black dark:text-gray-100 font-sans pb-16 flex flex-col transition-colors duration-200">
       {/* Top Notification Bar */}
       <div className="bg-black text-[#FFE600] px-4 py-2 border-b-2 border-black font-mono text-xs font-bold flex items-center justify-between overflow-x-auto">
         <div className="flex items-center gap-3 whitespace-nowrap">
@@ -103,15 +123,25 @@ export default function App() {
           </span>
         </div>
 
-        <a
-          href="/api"
-          target="_blank"
-          rel="noreferrer"
-          className="text-[#FFE600] hover:underline flex items-center gap-1 whitespace-nowrap ml-4"
-        >
-          <span>/api JSON Endpoint</span>
-          <ArrowUpRight className="w-3.5 h-3.5" />
-        </a>
+        <div className="flex items-center gap-4 ml-4">
+          <a
+            href="/api"
+            target="_blank"
+            rel="noreferrer"
+            className="text-[#FFE600] hover:underline flex items-center gap-1 whitespace-nowrap"
+          >
+            <span>/api JSON Endpoint</span>
+            <ArrowUpRight className="w-3.5 h-3.5" />
+          </a>
+          
+          <button 
+            onClick={() => setIsDark(!isDark)}
+            className="flex items-center justify-center p-1 hover:bg-gray-800 rounded transition-colors"
+            title="Toggle Dark Mode"
+          >
+            {isDark ? <Sun className="w-4 h-4 text-white" /> : <Moon className="w-4 h-4 text-[#FFE600]" />}
+          </button>
+        </div>
       </div>
 
       {/* Main Header */}
@@ -126,7 +156,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto w-full px-4 md:px-6 pt-6 flex-1 space-y-6">
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="neo-box bg-[#FFE600] p-4 text-center font-black uppercase text-sm flex items-center justify-center gap-2">
+          <div className="neo-box bg-[#FFE600] text-black p-4 text-center font-black uppercase text-sm flex items-center justify-center gap-2">
             <div className="w-4 h-4 border-3 border-black border-t-transparent rounded-full animate-spin" />
             FETCHING IP GEOLOCATION INFORMATION FOR {currentQuery || 'CURRENT IP'}...
           </div>
@@ -141,7 +171,7 @@ export default function App() {
 
             {/* Right Column: Live Map (5 cols) */}
             <div className="lg:col-span-5 space-y-6">
-              <div className="neo-box bg-white overflow-hidden space-y-0">
+              <div className="neo-box bg-white dark:bg-[#1A1A1A] overflow-hidden space-y-0 transition-colors duration-200">
                 <div className="bg-black text-white p-3 font-black text-xs uppercase flex items-center justify-between border-b-3 border-black">
                   <span className="flex items-center gap-1.5">
                     <Sparkles className="w-4 h-4 text-[#FFE600]" />
@@ -198,8 +228,8 @@ export default function App() {
       )}
 
       {/* Footer */}
-      <footer className="mt-12 border-t-4 border-black bg-white py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs font-bold text-gray-800">
+      <footer className="mt-12 border-t-4 border-black bg-white dark:bg-[#1A1A1A] py-6 px-4 transition-colors duration-200">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs font-bold text-gray-800 dark:text-gray-300">
           {/* Left Branding */}
           <div className="flex flex-wrap items-center gap-2">
             <span className="bg-black text-white px-2 py-0.5 font-black">

@@ -99,9 +99,9 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
       {/* Grid of Key Properties */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {/* Country & Region */}
-        <div className="neo-box bg-white p-4 space-y-2">
+        <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
-            <span className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <span className="text-lg">{flag}</span> COUNTRY & REGION
             </span>
             <span className="bg-[#FFE600] text-black border-2 border-black text-[10px] font-mono font-black px-1.5 py-0.5">
@@ -110,10 +110,10 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
           </div>
 
           <div className="space-y-1">
-            <div className="text-xl font-black text-black">
+            <div className="text-xl font-black text-black dark:text-white">
               {data.country || 'Unknown Country'}
             </div>
-            <div className="text-sm font-bold text-gray-800">
+            <div className="text-sm font-bold text-gray-800 dark:text-gray-300">
               Region: {data.regionName || 'N/A'}{' '}
               {data.region ? `(${data.region})` : ''}
             </div>
@@ -121,9 +121,9 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         </div>
 
         {/* City & Zip */}
-        <div className="neo-box bg-white p-4 space-y-2">
+        <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
-            <span className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#FF007A]" /> CITY & POSTAL CODE
             </span>
             <span className="bg-[#A855F7] text-white border-2 border-black text-[10px] font-mono font-black px-1.5 py-0.5">
@@ -132,19 +132,19 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
           </div>
 
           <div className="space-y-1">
-            <div className="text-xl font-black text-black">
+            <div className="text-xl font-black text-black dark:text-white">
               {data.city || 'Unknown City'}
             </div>
-            <div className="text-sm font-bold text-gray-800">
+            <div className="text-sm font-bold text-gray-800 dark:text-gray-300">
               Zip/Postal Code: <span className="font-mono">{data.zip || 'None'}</span>
             </div>
           </div>
         </div>
 
         {/* Lat & Lon Coordinates */}
-        <div className="neo-box bg-white p-4 space-y-2">
+        <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
-            <span className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <Compass className="w-4 h-4 text-[#06B6D4]" /> COORDINATES (LAT/LON)
             </span>
             <button
@@ -162,28 +162,28 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
             </button>
           </div>
 
-          <div className="font-mono text-base font-bold text-black grid grid-cols-2 gap-2 pt-1">
-            <div className="bg-gray-100 p-2 border-2 border-black">
-              <div className="text-[10px] font-sans font-black text-gray-600">LATITUDE</div>
+          <div className="font-mono text-base font-bold text-black dark:text-white grid grid-cols-2 gap-2 pt-1">
+            <div className="bg-gray-100 dark:bg-[#2A2A2A] p-2 border-2 border-black">
+              <div className="text-[10px] font-sans font-black text-gray-600 dark:text-gray-400">LATITUDE</div>
               <div className="text-lg font-black">{data.lat ?? 0}</div>
             </div>
-            <div className="bg-gray-100 p-2 border-2 border-black">
-              <div className="text-[10px] font-sans font-black text-gray-600">LONGITUDE</div>
+            <div className="bg-gray-100 dark:bg-[#2A2A2A] p-2 border-2 border-black">
+              <div className="text-[10px] font-sans font-black text-gray-600 dark:text-gray-400">LONGITUDE</div>
               <div className="text-lg font-black">{data.lon ?? 0}</div>
             </div>
           </div>
         </div>
 
         {/* Timezone */}
-        <div className="neo-box bg-white p-4 space-y-2">
+        <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
-            <span className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <Clock className="w-4 h-4 text-[#A855F7]" /> TIMEZONE & LOCAL TIME
             </span>
           </div>
 
           <div className="space-y-1">
-            <div className="text-base font-mono font-black text-black">
+            <div className="text-base font-mono font-black text-black dark:text-white">
               {data.timezone || 'UTC'}
             </div>
             {localTime && (
@@ -195,28 +195,28 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         </div>
 
         {/* ISP & Organization */}
-        <div className="neo-box bg-white p-4 space-y-2 sm:col-span-2">
+        <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 sm:col-span-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
-            <span className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+            <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <Wifi className="w-4 h-4 text-[#FF007A]" /> ISP & NETWORK OPERATOR
             </span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
             <div>
-              <div className="text-xs font-black text-gray-600 uppercase">INTERNET SERVICE PROVIDER</div>
-              <div className="text-base font-black text-black">{data.isp || 'N/A'}</div>
+              <div className="text-xs font-black text-gray-600 dark:text-gray-400 uppercase">INTERNET SERVICE PROVIDER</div>
+              <div className="text-base font-black text-black dark:text-white">{data.isp || 'N/A'}</div>
             </div>
 
             <div>
-              <div className="text-xs font-black text-gray-600 uppercase">ORGANIZATION</div>
-              <div className="text-base font-black text-black">{data.org || data.isp || 'N/A'}</div>
+              <div className="text-xs font-black text-gray-600 dark:text-gray-400 uppercase">ORGANIZATION</div>
+              <div className="text-base font-black text-black dark:text-white">{data.org || data.isp || 'N/A'}</div>
             </div>
 
             {data.as && (
-              <div className="md:col-span-2 bg-[#FFFDF5] border-2 border-black p-2 flex items-center gap-2">
+              <div className="md:col-span-2 bg-[#FFFDF5] dark:bg-[#2A2A2A] border-2 border-black p-2 flex items-center gap-2">
                 <Radio className="w-4 h-4 text-[#06B6D4] shrink-0" />
-                <span className="text-xs font-mono font-bold text-black break-all">
+                <span className="text-xs font-mono font-bold text-black dark:text-white break-all">
                   AS NUMBER / ROUTING: {data.as}
                 </span>
               </div>

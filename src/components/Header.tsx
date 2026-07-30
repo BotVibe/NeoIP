@@ -80,9 +80,9 @@ export const Header: React.FC<HeaderProps> = ({
                 value={inputVal}
                 onChange={(e) => setInputVal(e.target.value)}
                 placeholder="Enter IP address or domain (e.g., 170.205.81.42 or google.com)"
-                className="w-full bg-white text-black font-mono font-bold text-sm md:text-base border-3 border-black p-3 pl-10 md:pl-11 min-h-[48px] shadow-[4px_4px_0px_0px_#000] focus:outline-none focus:ring-0 focus:bg-[#FFFDF5]"
+                className="w-full bg-white dark:bg-[#1A1A1A] text-black dark:text-white font-mono font-bold text-sm md:text-base border-3 border-black p-3 pl-10 md:pl-11 min-h-[48px] shadow-[4px_4px_0px_0px_#000] focus:outline-none focus:ring-0 focus:bg-[#FFFDF5] dark:focus:bg-[#2A2A2A]"
               />
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-black pointer-events-none" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-black dark:text-gray-400 pointer-events-none" />
             </div>
 
             <button

@@ -92,7 +92,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
   };
 
   return (
-    <div className="neo-box bg-white overflow-hidden">
+    <div className="neo-box bg-white dark:bg-[#1A1A1A] overflow-hidden transition-colors duration-200">
       {/* Tabs Bar Header */}
       <div className="bg-black p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-b-3 border-black">
         <div className="flex flex-wrap items-center gap-1.5">
@@ -149,7 +149,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
       {activeTab === 'json' && (
         <div className="p-3.5 sm:p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-            <div className="text-xs font-mono font-black text-black flex items-center gap-2">
+            <div className="text-xs font-mono font-black text-black dark:text-white flex items-center gap-2">
               <span className="bg-[#22C55E] text-black px-2 py-0.5 border border-black shrink-0">
                 200 OK
               </span>
@@ -192,7 +192,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
                 className={`neo-btn px-3.5 py-2 text-xs min-h-[44px] font-black uppercase ${
                   activeLang === lang
                     ? 'bg-[#FF007A] text-white'
-                    : 'bg-gray-100 text-black hover:bg-gray-200'
+                    : 'bg-gray-100 dark:bg-[#2A2A2A] text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
                 {lang === 'js' ? 'JavaScript' : lang.toUpperCase()}
@@ -225,7 +225,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
         <div className="p-3.5 sm:p-4 space-y-5">
           {/* Endpoint Specification Table */}
           <div className="space-y-3">
-            <h3 className="text-sm font-black uppercase text-black flex items-center gap-2">
+            <h3 className="text-sm font-black uppercase text-black dark:text-white flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#FF007A]" />
               AVAILABLE API ENDPOINTS
             </h3>
@@ -240,27 +240,27 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
                     <th className="p-2.5">Response Type</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y-2 divide-black bg-white">
+                <tbody className="divide-y-2 divide-black bg-white dark:bg-[#1A1A1A] text-black dark:text-white">
                   <tr>
-                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100">GET</td>
+                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100 dark:bg-emerald-900">GET</td>
                     <td className="p-2.5 font-bold border-r-2 border-black">/api</td>
                     <td className="p-2.5 border-r-2 border-black font-sans">Returns IP geolocation of the caller</td>
                     <td className="p-2.5">application/json</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100">GET</td>
+                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100 dark:bg-emerald-900">GET</td>
                     <td className="p-2.5 font-bold border-r-2 border-black">/json</td>
                     <td className="p-2.5 border-r-2 border-black font-sans">Alias route for ip-api.com compatibility</td>
                     <td className="p-2.5">application/json</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100">GET</td>
+                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100 dark:bg-emerald-900">GET</td>
                     <td className="p-2.5 font-bold border-r-2 border-black">/api/:query</td>
                     <td className="p-2.5 border-r-2 border-black font-sans">Lookup specific IP or domain (e.g. /api/170.205.81.42)</td>
                     <td className="p-2.5">application/json</td>
                   </tr>
                   <tr>
-                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100">GET</td>
+                    <td className="p-2.5 font-bold border-r-2 border-black bg-emerald-100 dark:bg-emerald-900">GET</td>
                     <td className="p-2.5 font-bold border-r-2 border-black">/json/:query</td>
                     <td className="p-2.5 border-r-2 border-black font-sans">Alias route for ip-api lookup</td>
                     <td className="p-2.5">application/json</td>
@@ -271,12 +271,12 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           </div>
 
           {/* Field filtering playground */}
-          <div className="neo-box bg-[#FFFDF5] p-3.5 sm:p-4 space-y-3">
-            <h4 className="text-xs font-black uppercase text-black flex items-center gap-1.5">
+          <div className="neo-box bg-[#FFFDF5] dark:bg-[#2A2A2A] p-3.5 sm:p-4 space-y-3 transition-colors duration-200">
+            <h4 className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[#A855F7]" />
               INTERACTIVE FIELD FILTER TESTER (?fields=...)
             </h4>
-            <p className="text-xs text-gray-700 font-medium">
+            <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
               You can request specific response fields by passing a comma-separated list to <code className="bg-black text-white px-1">?fields=</code>.
             </p>
 
@@ -286,7 +286,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
                 value={testFieldQuery}
                 onChange={(e) => setTestFieldQuery(e.target.value)}
                 placeholder="e.g. status,country,city,lat,lon,query"
-                className="flex-1 bg-white border-2 border-black p-2.5 min-h-[44px] font-mono text-xs font-bold focus:outline-none"
+                className="flex-1 bg-white dark:bg-[#1A1A1A] text-black dark:text-white border-2 border-black p-2.5 min-h-[44px] font-mono text-xs font-bold focus:outline-none"
               />
               <button
                 onClick={handleRunPlaygroundTest}

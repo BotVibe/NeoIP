@@ -35,9 +35,11 @@ This project is a full-stack IP Geolocation web service and API developed with E
 ## 🎨 Design System: Neo-Brutalism
 
 - **Colors**: Bold high-contrast palette:
-  - Background: Off-white `#FFFDF5`
+  - Light Background: Off-white `#FFFDF5`
+  - Dark Background: Deep Gray `#121212` (via `.dark` class toggle)
   - Accents: Bright Yellow `#FFE600`, Vivid Pink `#FF007A`, Cyan `#06B6D4`, Lime Green `#22C55E`, Purple `#A855F7`
-  - Solid Black `#000000` borders and typography
+  - Solid Black `#000000` borders and typography (White `#FFFFFF` text in dark mode for readable elements)
+- **Dark Mode**: Fully supported via Tailwind CSS v4 custom variant (`@custom-variant dark (&:is(.dark *))`) with manual `localStorage` and OS preference syncing toggle in the top bar.
 - **Borders & Shadows**:
   - `border-3 border-black` / `border-2 border-black`
   - Offset hard drop shadows: `shadow-[4px_4px_0px_0px_#000]` or `neo-box` class.

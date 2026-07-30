@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:is(.dark *));
+
 @layer base {
   body {
     font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
@@ -47,11 +49,29 @@
   border-left: 2px solid #000;
 }
 
+.dark ::-webkit-scrollbar-track {
+  background: #111;
+  border-left: 2px solid #333;
+}
+
 ::-webkit-scrollbar-thumb {
   background: #000;
 }
 
+.dark ::-webkit-scrollbar-thumb {
+  background: #444;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   background: #222;
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #666;
+}
+
+/* Dark mode overrides for map */
+.dark .leaflet-tile-pane {
+  filter: invert(1) hue-rotate(180deg) brightness(0.9);
 }
 

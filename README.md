@@ -10,6 +10,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
    - Mobile-first responsive layout with minimum 44px touch targets.
    - Live Leaflet map positioning with custom markers.
    - Real-time client IP auto-detection & custom IP/domain lookup.
+   - Fully supported Dark Mode (manual toggle syncing with localStorage/OS preferences).
    - Detailed breakdown (Country, Region, City, ZIP, Coordinates, Timezone with local time, ISP, Org, AS).
    - Collapsible Developer & API Tools section (hidden by default) with Raw JSON, code snippet generator (cURL, JavaScript, Python, PHP, Go), and interactive field sandbox (`?fields=...`).
    - Custom SVG favicon and full SEO metadata (Open Graph, Twitter Cards, JSON-LD structured data).
