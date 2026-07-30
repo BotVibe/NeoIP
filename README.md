@@ -8,15 +8,17 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 
 1. **Browser Direct View (`/`)**: A Neo-brutalist web interface featuring:
    - Mobile-first responsive layout with minimum 44px touch targets.
+   - Non-shifting, flash-free loading experience (zero vertical layout movement with fixed skeleton loader & header progress bar).
    - Live Leaflet map positioning with custom markers.
    - Real-time client IP auto-detection & custom IP/domain lookup.
-   - Fully supported Dark Mode (manual toggle syncing with localStorage/OS preferences).
+   - Fully supported Dark Mode with eye-friendly dimmed colors (manual toggle syncing with localStorage/OS preferences).
    - Detailed breakdown (Country, Region, City, ZIP, Coordinates, Timezone with local time, ISP, Org, AS).
    - Collapsible Developer & API Tools section (hidden by default) with Raw JSON, code snippet generator (cURL, JavaScript, Python, PHP, Go), and interactive field sandbox (`?fields=...`).
    - Custom SVG favicon and full SEO metadata (Open Graph, Twitter Cards, JSON-LD structured data).
    - Centered GitHub repository button (`https://github.com/BotVibe/neo-ip`) in the footer.
 
 2. **API Endpoint (`/api`, `/json`, `/api/:query`, `/json/:query`)**:
+   - Production-hardened with `helmet` for security headers, gzip compression, and API rate limiting (300 requests / 15 min per IP).
    - Returns strict raw JSON adhering to the `ip-api.com/json` schema.
    - Supports cross-origin requests (CORS enabled).
    - Supports field filtering via `?fields=status,country,city,lat,lon,query`.
