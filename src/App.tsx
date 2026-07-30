@@ -211,7 +211,7 @@ export default function App() {
           {/* Centered GitHub Repository Link */}
           <div className="flex items-center justify-center">
             <a
-              href="https://github.com"
+              href="https://github.com/BotVibe/neo-ip"
               target="_blank"
               rel="noreferrer"
               className="neo-btn bg-black text-white hover:bg-[#FFE600] hover:text-black px-4 py-2 border-2 border-black font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#000]"
