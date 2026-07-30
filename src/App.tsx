@@ -4,13 +4,24 @@ import { Header } from './components/Header';
 import { InfoCard } from './components/InfoCard';
 import { MapComponent } from './components/MapComponent';
 import { TabsSection } from './components/TabsSection';
-import { ShieldCheck, Sparkles, Terminal, Activity, ArrowUpRight } from 'lucide-react';
+import {
+  ShieldCheck,
+  Sparkles,
+  Terminal,
+  Activity,
+  ArrowUpRight,
+  Github,
+  ChevronDown,
+  ChevronUp,
+  Code2,
+} from 'lucide-react';
 
 export default function App() {
   const [geoData, setGeoData] = useState<GeoResponse | null>(null);
   const [currentQuery, setCurrentQuery] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  const [showDevTools, setShowDevTools] = useState<boolean>(false);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -151,12 +162,28 @@ export default function App() {
             </div>
 
             {/* Full Width Bottom Tabs: JSON, Code Snippets & API Docs */}
-            <div className="lg:col-span-12">
-              <TabsSection
-                data={geoData}
-                currentIp={currentQuery}
-                onCopy={handleCopy}
-              />
+            <div className="lg:col-span-12 space-y-3">
+              <button
+                onClick={() => setShowDevTools((prev) => !prev)}
+                className="w-full neo-btn bg-[#FFE600] text-black border-3 border-black p-3.5 font-black text-xs md:text-sm uppercase flex items-center justify-between gap-2 hover:bg-[#FF007A] hover:text-white transition-all shadow-[4px_4px_0px_0px_#000]"
+              >
+                <span className="flex items-center gap-2">
+                  <Code2 className="w-5 h-5 shrink-0" />
+                  <span>DEVELOPER & API TOOLS (RAW JSON / CODE SNIPPETS / TESTER)</span>
+                </span>
+                <span className="bg-black text-white px-3 py-1 text-xs font-mono font-bold border border-black flex items-center gap-1.5 shrink-0">
+                  {showDevTools ? 'HIDE SECTION' : 'SHOW SECTION'}
+                  {showDevTools ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </span>
+              </button>
+
+              {showDevTools && (
+                <TabsSection
+                  data={geoData}
+                  currentIp={currentQuery}
+                  onCopy={handleCopy}
+                />
+              )}
             </div>
           </div>
         )}
@@ -172,15 +199,30 @@ export default function App() {
 
       {/* Footer */}
       <footer className="mt-12 border-t-4 border-black bg-white py-6 px-4">
-        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-xs font-bold text-gray-800">
-          <div className="flex items-center gap-2">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6 font-mono text-xs font-bold text-gray-800">
+          {/* Left Branding */}
+          <div className="flex flex-wrap items-center gap-2">
             <span className="bg-black text-white px-2 py-0.5 font-black">
               IP-API
             </span>
             <span>NEO-BRUTALIST GEOLOCATION ENGINE</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          {/* Centered GitHub Repository Link */}
+          <div className="flex items-center justify-center">
+            <a
+              href="https://github.com"
+              target="_blank"
+              rel="noreferrer"
+              className="neo-btn bg-black text-white hover:bg-[#FFE600] hover:text-black px-4 py-2 border-2 border-black font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#000]"
+            >
+              <Github className="w-4 h-4 shrink-0 fill-current" />
+              <span>GitHub Repository</span>
+            </a>
+          </div>
+
+          {/* Right API Endpoint Links */}
+          <div className="flex flex-wrap items-center justify-center gap-4">
             <a href="/api" className="hover:underline flex items-center gap-1 font-black">
               <Terminal className="w-3.5 h-3.5 text-[#FF007A]" />
               GET /api
