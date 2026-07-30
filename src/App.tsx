@@ -111,9 +111,9 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#FFFDF5] dark:bg-[#121212] text-black dark:text-gray-100 font-sans pb-16 flex flex-col transition-colors duration-200">
       {/* Top Notification Bar */}
-      <div className="bg-black text-[#FFE600] px-4 py-2 border-b-2 border-black font-mono text-xs font-bold flex items-center justify-between overflow-x-auto">
+      <div className="bg-black text-[#FFE600] dark:text-[#CCB800] px-4 py-2 border-b-2 border-black font-mono text-xs font-bold flex items-center justify-between overflow-x-auto">
         <div className="flex items-center gap-3 whitespace-nowrap">
-          <span className="flex items-center gap-1 bg-[#22C55E] text-black px-2 py-0.5 text-[10px] uppercase font-black">
+          <span className="flex items-center gap-1 bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white px-2 py-0.5 text-[10px] uppercase font-black">
             <Activity className="w-3 h-3" /> ONLINE
           </span>
           <span>IP GEOLOCATION WEB SERVICE & REST API</span>
@@ -128,7 +128,7 @@ export default function App() {
             href="/api"
             target="_blank"
             rel="noreferrer"
-            className="text-[#FFE600] hover:underline flex items-center gap-1 whitespace-nowrap"
+            className="text-[#FFE600] dark:text-[#CCB800] hover:underline flex items-center gap-1 whitespace-nowrap"
           >
             <span>/api JSON Endpoint</span>
             <ArrowUpRight className="w-3.5 h-3.5" />
@@ -156,7 +156,7 @@ export default function App() {
       <main className="max-w-7xl mx-auto w-full px-4 md:px-6 pt-6 flex-1 space-y-6">
         {/* Loading Indicator */}
         {isLoading && (
-          <div className="neo-box bg-[#FFE600] text-black p-4 text-center font-black uppercase text-sm flex items-center justify-center gap-2">
+          <div className="neo-box bg-[#FFE600] dark:bg-[#CCB800] text-black p-4 text-center font-black uppercase text-sm flex items-center justify-center gap-2">
             <div className="w-4 h-4 border-3 border-black border-t-transparent rounded-full animate-spin" />
             FETCHING IP GEOLOCATION INFORMATION FOR {currentQuery || 'CURRENT IP'}...
           </div>
@@ -174,10 +174,10 @@ export default function App() {
               <div className="neo-box bg-white dark:bg-[#1A1A1A] overflow-hidden space-y-0 transition-colors duration-200">
                 <div className="bg-black text-white p-3 font-black text-xs uppercase flex items-center justify-between border-b-3 border-black">
                   <span className="flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-[#FFE600]" />
+                    <Sparkles className="w-4 h-4 text-[#FFE600] dark:text-[#CCB800]" />
                     GEOGRAPHIC LOCATION MAP
                   </span>
-                  <span className="font-mono text-[#22C55E]">
+                  <span className="font-mono text-[#22C55E] dark:text-[#1B9E4B]">
                     {geoData.city}, {geoData.countryCode}
                   </span>
                 </div>
@@ -195,7 +195,7 @@ export default function App() {
             <div className="lg:col-span-12 space-y-3">
               <button
                 onClick={() => setShowDevTools((prev) => !prev)}
-                className="w-full neo-btn bg-[#FFE600] text-black border-3 border-black p-3.5 font-black text-xs md:text-sm uppercase flex items-center justify-between gap-2 hover:bg-[#FF007A] hover:text-white transition-all shadow-[4px_4px_0px_0px_#000]"
+                className="w-full neo-btn bg-[#FFE600] dark:bg-[#CCB800] text-black border-3 border-black p-3.5 font-black text-xs md:text-sm uppercase flex items-center justify-between gap-2 hover:bg-[#FF007A] dark:hover:bg-[#CC0062] hover:text-white transition-all shadow-[4px_4px_0px_0px_#000]"
               >
                 <span className="flex items-center gap-2">
                   <Code2 className="w-5 h-5 shrink-0" />
@@ -221,8 +221,8 @@ export default function App() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed bottom-6 right-6 z-50 neo-box bg-[#22C55E] text-black font-black px-5 py-3 text-sm uppercase flex items-center gap-2 shadow-[4px_4px_0px_0px_#000] animate-bounce">
-          <ShieldCheck className="w-5 h-5 fill-black text-[#22C55E]" />
+        <div className="fixed bottom-6 right-6 z-50 neo-box bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white font-black px-5 py-3 text-sm uppercase flex items-center gap-2 shadow-[4px_4px_0px_0px_#000] animate-bounce">
+          <ShieldCheck className="w-5 h-5 fill-black dark:fill-white text-[#22C55E] dark:text-[#1B9E4B]" />
           {toastMessage}
         </div>
       )}
@@ -244,7 +244,7 @@ export default function App() {
               href="https://github.com/BotVibe/neo-ip"
               target="_blank"
               rel="noreferrer"
-              className="neo-btn bg-black text-white hover:bg-[#FFE600] hover:text-black px-4 py-2 border-2 border-black font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#000]"
+              className="neo-btn bg-black text-white hover:bg-[#FFE600] dark:hover:bg-[#CCB800] hover:text-black px-4 py-2 border-2 border-black font-black flex items-center gap-2 transition-all shadow-[2px_2px_0px_0px_#000]"
             >
               <Github className="w-4 h-4 shrink-0 fill-current" />
               <span>GitHub Repository</span>
@@ -254,7 +254,7 @@ export default function App() {
           {/* Right API Endpoint Links */}
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a href="/api" className="hover:underline flex items-center gap-1 font-black">
-              <Terminal className="w-3.5 h-3.5 text-[#FF007A]" />
+              <Terminal className="w-3.5 h-3.5 text-[#FF007A] dark:text-[#CC0062]" />
               GET /api
             </a>
             <a href="/json" className="hover:underline flex items-center gap-1 font-black">

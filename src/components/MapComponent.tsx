@@ -55,13 +55,13 @@ export const MapComponent: React.FC<MapComponentProps> = ({
             justify-content: center;
             font-weight: 900;
             font-size: 14px;
-            transform: translate(-50%, -50%);
           ">
             📍
           </div>
         `,
         iconSize: [28, 28],
         iconAnchor: [14, 14],
+        popupAnchor: [0, -14],
       });
 
       const marker = L.marker([lat, lon], { icon: customIcon }).addTo(map);

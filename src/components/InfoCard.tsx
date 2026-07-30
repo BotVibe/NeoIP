@@ -56,19 +56,19 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
   return (
     <div className="space-y-4">
       {/* Primary IP Banner */}
-      <div className="neo-box bg-[#06B6D4] p-3.5 sm:p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="neo-box bg-[#06B6D4] dark:bg-[#0491A9] p-3.5 sm:p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition-colors duration-200">
         <div className="min-w-0">
-          <div className="text-xs font-black uppercase text-black tracking-wider flex items-center gap-1.5 mb-1">
+          <div className="text-xs font-black uppercase text-black dark:text-white tracking-wider flex items-center gap-1.5 mb-1">
             <Globe2 className="w-4 h-4 shrink-0" />
             RESOLVED TARGET QUERY IP
           </div>
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <span className="text-xl sm:text-2xl md:text-3xl font-mono font-black text-black break-all">
+            <span className="text-xl sm:text-2xl md:text-3xl font-mono font-black text-black dark:text-white break-all">
               {data.query}
             </span>
             <button
               onClick={() => handleCopy(data.query, 'IP Address')}
-              className="neo-btn bg-white text-black p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-xs font-bold hover:bg-[#FFE600] shrink-0"
+              className="neo-btn bg-white dark:bg-[#2A2A2A] text-black dark:text-white p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-xs font-bold hover:bg-[#FFE600] dark:hover:bg-[#CCB800] shrink-0"
               title="Copy IP Address"
             >
               {copiedField === 'IP Address' ? (
@@ -83,13 +83,13 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         {/* Status Pill */}
         <div className="flex items-center gap-2 shrink-0">
           {data.status === 'success' ? (
-            <div className="bg-[#22C55E] text-black border-3 border-black px-3.5 py-2 font-black text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
-              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 fill-black text-[#22C55E] shrink-0" />
+            <div className="bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white border-3 border-black px-3.5 py-2 font-black text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 fill-black dark:fill-white text-[#22C55E] dark:text-[#1B9E4B] shrink-0" />
               STATUS: SUCCESS (200 OK)
             </div>
           ) : (
-            <div className="bg-[#FF007A] text-white border-3 border-black px-3.5 py-2 font-black text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
-              <XCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-[#FF007A] shrink-0" />
+            <div className="bg-[#FF007A] dark:bg-[#CC0062] text-white border-3 border-black px-3.5 py-2 font-black text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
+              <XCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-[#FF007A] dark:text-[#CC0062] shrink-0" />
               STATUS: FAIL ({data.message || 'INVALID QUERY'})
             </div>
           )}
@@ -104,7 +104,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
             <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
               <span className="text-lg">{flag}</span> COUNTRY & REGION
             </span>
-            <span className="bg-[#FFE600] text-black border-2 border-black text-[10px] font-mono font-black px-1.5 py-0.5">
+            <span className="bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white border-2 border-black text-[10px] font-mono font-black px-1.5 py-0.5">
               {data.countryCode || 'N/A'}
             </span>
           </div>
@@ -124,9 +124,9 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
             <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
-              <MapPin className="w-4 h-4 text-[#FF007A]" /> CITY & POSTAL CODE
+              <MapPin className="w-4 h-4 text-[#FF007A] dark:text-[#CC0062]" /> CITY & POSTAL CODE
             </span>
-            <span className="bg-[#A855F7] text-white border-2 border-black text-[10px] font-mono font-black px-1.5 py-0.5">
+            <span className="bg-[#A855F7] dark:bg-[#8644C6] text-white border-2 border-black text-[10px] font-mono font-black px-1.5 py-0.5">
               ZIP: {data.zip || 'N/A'}
             </span>
           </div>
@@ -145,17 +145,17 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
             <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
-              <Compass className="w-4 h-4 text-[#06B6D4]" /> COORDINATES (LAT/LON)
+              <Compass className="w-4 h-4 text-[#06B6D4] dark:text-[#0491A9]" /> COORDINATES (LAT/LON)
             </span>
             <button
               onClick={() =>
                 handleCopy(`${data.lat}, ${data.lon}`, 'Coordinates')
               }
-              className="neo-box-sm bg-[#FFE600] text-black p-1 text-xs hover:bg-[#22C55E]"
+              className="neo-box-sm bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white p-1 text-xs hover:bg-[#22C55E] dark:hover:bg-[#1B9E4B]"
               title="Copy Coordinates"
             >
               {copiedField === 'Coordinates' ? (
-                <Check className="w-3.5 h-3.5 text-black" />
+                <Check className="w-3.5 h-3.5 text-black dark:text-white" />
               ) : (
                 <Copy className="w-3.5 h-3.5" />
               )}
@@ -178,7 +178,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
             <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-[#A855F7]" /> TIMEZONE & LOCAL TIME
+              <Clock className="w-4 h-4 text-[#A855F7] dark:text-[#8644C6]" /> TIMEZONE & LOCAL TIME
             </span>
           </div>
 
@@ -187,7 +187,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
               {data.timezone || 'UTC'}
             </div>
             {localTime && (
-              <div className="bg-[#22C55E] text-black border-2 border-black p-1.5 font-mono text-center font-black text-sm shadow-[2px_2px_0px_0px_#000]">
+              <div className="bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white border-2 border-black p-1.5 font-mono text-center font-black text-sm shadow-[2px_2px_0px_0px_#000]">
                 ⏰ LOCAL TIME: {localTime}
               </div>
             )}
@@ -198,7 +198,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
         <div className="neo-box bg-white dark:bg-[#1A1A1A] p-4 space-y-2 sm:col-span-2 transition-colors duration-200">
           <div className="flex items-center justify-between border-b-2 border-black pb-2">
             <span className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
-              <Wifi className="w-4 h-4 text-[#FF007A]" /> ISP & NETWORK OPERATOR
+              <Wifi className="w-4 h-4 text-[#FF007A] dark:text-[#CC0062]" /> ISP & NETWORK OPERATOR
             </span>
           </div>
 
@@ -215,7 +215,7 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
 
             {data.as && (
               <div className="md:col-span-2 bg-[#FFFDF5] dark:bg-[#2A2A2A] border-2 border-black p-2 flex items-center gap-2">
-                <Radio className="w-4 h-4 text-[#06B6D4] shrink-0" />
+                <Radio className="w-4 h-4 text-[#06B6D4] dark:text-[#0491A9] shrink-0" />
                 <span className="text-xs font-mono font-bold text-black dark:text-white break-all">
                   AS NUMBER / ROUTING: {data.as}
                 </span>

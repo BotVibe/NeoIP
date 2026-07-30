@@ -100,7 +100,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
             onClick={() => setActiveTab('json')}
             className={`px-3.5 py-2 font-black text-xs uppercase flex items-center gap-1.5 min-h-[44px] transition-all ${
               activeTab === 'json'
-                ? 'bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
+                ? 'bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
                 : 'text-white hover:bg-gray-800'
             }`}
           >
@@ -112,7 +112,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
             onClick={() => setActiveTab('code')}
             className={`px-3.5 py-2 font-black text-xs uppercase flex items-center gap-1.5 min-h-[44px] transition-all ${
               activeTab === 'code'
-                ? 'bg-[#FF007A] text-white border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
+                ? 'bg-[#FF007A] dark:bg-[#CC0062] text-white border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
                 : 'text-white hover:bg-gray-800'
             }`}
           >
@@ -124,7 +124,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
             onClick={() => setActiveTab('docs')}
             className={`px-3.5 py-2 font-black text-xs uppercase flex items-center gap-1.5 min-h-[44px] transition-all ${
               activeTab === 'docs'
-                ? 'bg-[#06B6D4] text-black border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
+                ? 'bg-[#06B6D4] dark:bg-[#0491A9] text-black dark:text-white border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
                 : 'text-white hover:bg-gray-800'
             }`}
           >
@@ -138,7 +138,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           href={`/api${currentIp ? `/${currentIp}` : ''}`}
           target="_blank"
           rel="noreferrer"
-          className="bg-[#22C55E] text-black border-2 border-black px-3.5 py-2 text-xs font-black uppercase flex items-center justify-center gap-1.5 min-h-[44px] hover:bg-[#4ADE80] shrink-0"
+          className="bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white border-2 border-black px-3.5 py-2 text-xs font-black uppercase flex items-center justify-center gap-1.5 min-h-[44px] hover:bg-[#4ADE80] dark:hover:bg-[#16A34A] shrink-0"
         >
           <ExternalLink className="w-3.5 h-3.5 shrink-0" />
           Test Endpoint
@@ -150,7 +150,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
         <div className="p-3.5 sm:p-4 space-y-3">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="text-xs font-mono font-black text-black dark:text-white flex items-center gap-2">
-              <span className="bg-[#22C55E] text-black px-2 py-0.5 border border-black shrink-0">
+              <span className="bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white px-2 py-0.5 border border-black shrink-0">
                 200 OK
               </span>
               <span className="break-all">Content-Type: application/json</span>
@@ -159,7 +159,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
             <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleCopyJson}
-                className="neo-btn bg-[#FFE600] text-black px-3 py-2 text-xs min-h-[44px] font-black flex items-center gap-1.5"
+                className="neo-btn bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white px-3 py-2 text-xs min-h-[44px] font-black flex items-center gap-1.5"
               >
                 {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 {copiedCode ? 'COPIED!' : 'COPY JSON'}
@@ -167,7 +167,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
 
               <button
                 onClick={handleDownloadJson}
-                className="neo-btn bg-[#A855F7] text-white px-3 py-2 text-xs min-h-[44px] font-black flex items-center gap-1.5"
+                className="neo-btn bg-[#A855F7] dark:bg-[#8644C6] text-white px-3 py-2 text-xs min-h-[44px] font-black flex items-center gap-1.5"
               >
                 <Download className="w-4 h-4" />
                 DOWNLOAD .JSON
@@ -191,7 +191,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
                 onClick={() => setActiveLang(lang)}
                 className={`neo-btn px-3.5 py-2 text-xs min-h-[44px] font-black uppercase ${
                   activeLang === lang
-                    ? 'bg-[#FF007A] text-white'
+                    ? 'bg-[#FF007A] dark:bg-[#CC0062] text-white'
                     : 'bg-gray-100 dark:bg-[#2A2A2A] text-black dark:text-white hover:bg-gray-200 dark:hover:bg-gray-700'
                 }`}
               >
@@ -211,7 +211,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
                 setCopiedCode(true);
                 setTimeout(() => setCopiedCode(false), 2000);
               }}
-              className="mt-2 sm:mt-0 sm:absolute sm:top-3 sm:right-3 neo-btn bg-[#FFE600] text-black px-3 py-2 min-h-[44px] text-xs font-black flex items-center justify-center gap-1.5 w-full sm:w-auto"
+              className="mt-2 sm:mt-0 sm:absolute sm:top-3 sm:right-3 neo-btn bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white px-3 py-2 min-h-[44px] text-xs font-black flex items-center justify-center gap-1.5 w-full sm:w-auto"
             >
               {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
               {copiedCode ? 'COPIED' : 'COPY CODE'}
@@ -226,13 +226,13 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           {/* Endpoint Specification Table */}
           <div className="space-y-3">
             <h3 className="text-sm font-black uppercase text-black dark:text-white flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#FF007A]" />
+              <Layers className="w-4 h-4 text-[#FF007A] dark:text-[#CC0062]" />
               AVAILABLE API ENDPOINTS
             </h3>
 
             <div className="overflow-x-auto border-3 border-black">
               <table className="w-full text-left font-mono text-xs border-collapse min-w-[500px]">
-                <thead className="bg-[#FFE600] text-black border-b-2 border-black font-sans font-black uppercase">
+                <thead className="bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white border-b-2 border-black font-sans font-black uppercase">
                   <tr>
                     <th className="p-2.5 border-r-2 border-black">Method</th>
                     <th className="p-2.5 border-r-2 border-black">Endpoint</th>
@@ -273,7 +273,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           {/* Field filtering playground */}
           <div className="neo-box bg-[#FFFDF5] dark:bg-[#2A2A2A] p-3.5 sm:p-4 space-y-3 transition-colors duration-200">
             <h4 className="text-xs font-black uppercase text-black dark:text-white flex items-center gap-1.5">
-              <Sparkles className="w-4 h-4 text-[#A855F7]" />
+              <Sparkles className="w-4 h-4 text-[#A855F7] dark:text-[#8644C6]" />
               INTERACTIVE FIELD FILTER TESTER (?fields=...)
             </h4>
             <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
@@ -291,7 +291,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
               <button
                 onClick={handleRunPlaygroundTest}
                 disabled={isTesting}
-                className="neo-btn bg-[#22C55E] text-black px-4 py-2.5 min-h-[44px] font-black text-xs uppercase flex items-center justify-center gap-1.5"
+                className="neo-btn bg-[#22C55E] dark:bg-[#1B9E4B] text-black dark:text-white px-4 py-2.5 min-h-[44px] font-black text-xs uppercase flex items-center justify-center gap-1.5"
               >
                 <Play className="w-4 h-4 fill-current shrink-0" />
                 {isTesting ? 'EXECUTING...' : 'RUN REQUEST'}
