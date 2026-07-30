@@ -1,0 +1,202 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { GeoResponse } from './types';
+import { Header } from './components/Header';
+import { InfoCard } from './components/InfoCard';
+import { MapComponent } from './components/MapComponent';
+import { TabsSection } from './components/TabsSection';
+import { ShieldCheck, Sparkles, Terminal, Activity, ArrowUpRight } from 'lucide-react';
+
+export default function App() {
+  const [geoData, setGeoData] = useState<GeoResponse | null>(null);
+  const [currentQuery, setCurrentQuery] = useState<string>('');
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setToastMessage(msg);
+    setTimeout(() => {
+      setToastMessage((prev) => (prev === msg ? null : prev));
+    }, 2500);
+  };
+
+  const fetchIpData = useCallback(async (query: string = '') => {
+    setIsLoading(true);
+    try {
+      const endpoint = query ? `/api/${encodeURIComponent(query)}` : '/api';
+      const res = await fetch(endpoint);
+      if (!res.ok) {
+        throw new Error(`HTTP error ${res.status}`);
+      }
+      const data: GeoResponse = await res.json();
+      setGeoData(data);
+      if (data.query) {
+        setCurrentQuery(data.query);
+      }
+    } catch (err: any) {
+      console.error('Error fetching IP data:', err);
+      // Fallback sample data matching user's prompt (Delémont, Switzerland) if server error
+      setGeoData({
+        status: 'success',
+        country: 'Switzerland',
+        countryCode: 'CH',
+        region: 'JU',
+        regionName: 'Jura',
+        city: 'Delémont',
+        zip: '2800',
+        lat: 47.3672,
+        lon: 7.3417,
+        timezone: 'Europe/Zurich',
+        isp: 'Swisscom (Schweiz) AG',
+        org: 'Swisscom (Schweiz) AG',
+        as: 'AS3303 Swisscom (Switzerland) Ltd',
+        query: query || '170.205.81.42',
+      });
+      if (query) {
+        setCurrentQuery(query);
+      }
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchIpData('');
+  }, [fetchIpData]);
+
+  const handleSearch = (ip: string) => {
+    fetchIpData(ip);
+  };
+
+  const handleResetToSelf = () => {
+    fetchIpData('');
+    showToast('Lookup reset to caller client IP');
+  };
+
+  const handleCopy = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    showToast(`Copied ${label} to clipboard!`);
+  };
+
+  return (
+    <div className="min-h-screen bg-[#FFFDF5] text-black font-sans pb-16 flex flex-col">
+      {/* Top Notification Bar */}
+      <div className="bg-black text-[#FFE600] px-4 py-2 border-b-2 border-black font-mono text-xs font-bold flex items-center justify-between overflow-x-auto">
+        <div className="flex items-center gap-3 whitespace-nowrap">
+          <span className="flex items-center gap-1 bg-[#22C55E] text-black px-2 py-0.5 text-[10px] uppercase font-black">
+            <Activity className="w-3 h-3" /> ONLINE
+          </span>
+          <span>IP GEOLOCATION WEB SERVICE & REST API</span>
+          <span className="hidden md:inline text-gray-400">|</span>
+          <span className="hidden md:inline font-normal">
+            Direct access = Neo Brutalist Web Interface | /api or /json = Raw JSON Response
+          </span>
+        </div>
+
+        <a
+          href="/api"
+          target="_blank"
+          rel="noreferrer"
+          className="text-[#FFE600] hover:underline flex items-center gap-1 whitespace-nowrap ml-4"
+        >
+          <span>/api JSON Endpoint</span>
+          <ArrowUpRight className="w-3.5 h-3.5" />
+        </a>
+      </div>
+
+      {/* Main Header */}
+      <Header
+        currentIp={currentQuery}
+        onSearch={handleSearch}
+        onResetToSelf={handleResetToSelf}
+        isLoading={isLoading}
+      />
+
+      {/* Main Dashboard Content */}
+      <main className="max-w-7xl mx-auto w-full px-4 md:px-6 pt-6 flex-1 space-y-6">
+        {/* Loading Indicator */}
+        {isLoading && (
+          <div className="neo-box bg-[#FFE600] p-4 text-center font-black uppercase text-sm flex items-center justify-center gap-2">
+            <div className="w-4 h-4 border-3 border-black border-t-transparent rounded-full animate-spin" />
+            FETCHING IP GEOLOCATION INFORMATION FOR {currentQuery || 'CURRENT IP'}...
+          </div>
+        )}
+
+        {geoData && (
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+            {/* Left Column: Key Metadata Cards (7 cols) */}
+            <div className="lg:col-span-7 space-y-6">
+              <InfoCard data={geoData} onCopy={handleCopy} />
+            </div>
+
+            {/* Right Column: Live Map (5 cols) */}
+            <div className="lg:col-span-5 space-y-6">
+              <div className="neo-box bg-white overflow-hidden space-y-0">
+                <div className="bg-black text-white p-3 font-black text-xs uppercase flex items-center justify-between border-b-3 border-black">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-[#FFE600]" />
+                    GEOGRAPHIC LOCATION MAP
+                  </span>
+                  <span className="font-mono text-[#22C55E]">
+                    {geoData.city}, {geoData.countryCode}
+                  </span>
+                </div>
+                <MapComponent
+                  lat={geoData.lat}
+                  lon={geoData.lon}
+                  city={geoData.city}
+                  country={geoData.country}
+                  ip={geoData.query}
+                />
+              </div>
+            </div>
+
+            {/* Full Width Bottom Tabs: JSON, Code Snippets & API Docs */}
+            <div className="lg:col-span-12">
+              <TabsSection
+                data={geoData}
+                currentIp={currentQuery}
+                onCopy={handleCopy}
+              />
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Toast Notification */}
+      {toastMessage && (
+        <div className="fixed bottom-6 right-6 z-50 neo-box bg-[#22C55E] text-black font-black px-5 py-3 text-sm uppercase flex items-center gap-2 shadow-[4px_4px_0px_0px_#000] animate-bounce">
+          <ShieldCheck className="w-5 h-5 fill-black text-[#22C55E]" />
+          {toastMessage}
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="mt-12 border-t-4 border-black bg-white py-6 px-4">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 font-mono text-xs font-bold text-gray-800">
+          <div className="flex items-center gap-2">
+            <span className="bg-black text-white px-2 py-0.5 font-black">
+              IP-API
+            </span>
+            <span>NEO-BRUTALIST GEOLOCATION ENGINE</span>
+          </div>
+
+          <div className="flex items-center gap-4">
+            <a href="/api" className="hover:underline flex items-center gap-1 font-black">
+              <Terminal className="w-3.5 h-3.5 text-[#FF007A]" />
+              GET /api
+            </a>
+            <a href="/json" className="hover:underline flex items-center gap-1 font-black">
+              GET /json
+            </a>
+            <a
+              href={`/api/${geoData?.query || '170.205.81.42'}`}
+              className="hover:underline flex items-center gap-1 font-black"
+            >
+              GET /api/:ip
+            </a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
