@@ -24,10 +24,10 @@ This project is a full-stack IP Geolocation web service and API developed with E
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
 - **`src/App.tsx`**: Single-page application rendering the Neo-brutalist dashboard.
 - **`src/components/`**:
-  - `Header.tsx`: Title banner, quick presets, and search bar.
-  - `InfoCard.tsx`: Formatted geolocation details with single-click copy buttons.
+  - `Header.tsx`: Title banner, caller IP lookup trigger, and search bar (mobile touch optimized, quick presets removed).
+  - `InfoCard.tsx`: Formatted geolocation details with single-click copy buttons and responsive text wrapping.
   - `MapComponent.tsx`: Leaflet interactive map with custom Neo-brutalist marker.
-  - `TabsSection.tsx`: Raw JSON viewer, multilingual code snippet generator, and interactive field tester.
+  - `TabsSection.tsx`: Raw JSON viewer, multilingual code snippet generator, and interactive field tester with touch-friendly controls.
 
 ---
 

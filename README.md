@@ -7,6 +7,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 ## 🌟 Dual-Mode Architecture
 
 1. **Browser Direct View (`/`)**: A Neo-brutalist web interface featuring:
+   - Mobile-first responsive layout with minimum 44px touch targets.
    - Live Leaflet map positioning with custom markers.
    - Real-time client IP auto-detection & custom IP/domain lookup.
    - Detailed breakdown (Country, Region, City, ZIP, Coordinates, Timezone with local time, ISP, Org, AS).

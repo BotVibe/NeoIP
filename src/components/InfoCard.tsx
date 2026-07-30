@@ -56,40 +56,40 @@ export const InfoCard: React.FC<InfoCardProps> = ({ data, onCopy }) => {
   return (
     <div className="space-y-4">
       {/* Primary IP Banner */}
-      <div className="neo-box bg-[#06B6D4] p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div>
+      <div className="neo-box bg-[#06B6D4] p-3.5 sm:p-4 md:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
           <div className="text-xs font-black uppercase text-black tracking-wider flex items-center gap-1.5 mb-1">
-            <Globe2 className="w-4 h-4" />
+            <Globe2 className="w-4 h-4 shrink-0" />
             RESOLVED TARGET QUERY IP
           </div>
-          <div className="flex items-center gap-3">
-            <span className="text-2xl md:text-3xl font-mono font-black text-black">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <span className="text-xl sm:text-2xl md:text-3xl font-mono font-black text-black break-all">
               {data.query}
             </span>
             <button
               onClick={() => handleCopy(data.query, 'IP Address')}
-              className="neo-btn bg-white text-black p-1.5 text-xs font-bold hover:bg-[#FFE600]"
+              className="neo-btn bg-white text-black p-2 min-h-[44px] min-w-[44px] flex items-center justify-center text-xs font-bold hover:bg-[#FFE600] shrink-0"
               title="Copy IP Address"
             >
               {copiedField === 'IP Address' ? (
-                <Check className="w-4 h-4 text-green-700" />
+                <Check className="w-4 h-4 text-green-700 shrink-0" />
               ) : (
-                <Copy className="w-4 h-4" />
+                <Copy className="w-4 h-4 shrink-0" />
               )}
             </button>
           </div>
         </div>
 
         {/* Status Pill */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0">
           {data.status === 'success' ? (
-            <div className="bg-[#22C55E] text-black border-3 border-black px-4 py-2 font-black text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
-              <CheckCircle2 className="w-5 h-5 fill-black text-[#22C55E]" />
+            <div className="bg-[#22C55E] text-black border-3 border-black px-3.5 py-2 font-black text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
+              <CheckCircle2 className="w-4 h-4 sm:w-5 sm:h-5 fill-black text-[#22C55E] shrink-0" />
               STATUS: SUCCESS (200 OK)
             </div>
           ) : (
-            <div className="bg-[#FF007A] text-white border-3 border-black px-4 py-2 font-black text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
-              <XCircle className="w-5 h-5 fill-white text-[#FF007A]" />
+            <div className="bg-[#FF007A] text-white border-3 border-black px-3.5 py-2 font-black text-xs sm:text-sm uppercase flex items-center gap-2 shadow-[3px_3px_0px_0px_#000]">
+              <XCircle className="w-4 h-4 sm:w-5 sm:h-5 fill-white text-[#FF007A] shrink-0" />
               STATUS: FAIL ({data.message || 'INVALID QUERY'})
             </div>
           )}

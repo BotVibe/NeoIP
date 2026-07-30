@@ -94,41 +94,41 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
   return (
     <div className="neo-box bg-white overflow-hidden">
       {/* Tabs Bar Header */}
-      <div className="bg-black p-2 flex flex-wrap items-center justify-between gap-2 border-b-3 border-black">
-        <div className="flex items-center gap-1">
+      <div className="bg-black p-2.5 flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2.5 border-b-3 border-black">
+        <div className="flex flex-wrap items-center gap-1.5">
           <button
             onClick={() => setActiveTab('json')}
-            className={`px-4 py-2 font-black text-xs uppercase flex items-center gap-1.5 transition-all ${
+            className={`px-3.5 py-2 font-black text-xs uppercase flex items-center gap-1.5 min-h-[44px] transition-all ${
               activeTab === 'json'
                 ? 'bg-[#FFE600] text-black border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
                 : 'text-white hover:bg-gray-800'
             }`}
           >
-            <FileJson className="w-4 h-4" />
+            <FileJson className="w-4 h-4 shrink-0" />
             RAW JSON
           </button>
 
           <button
             onClick={() => setActiveTab('code')}
-            className={`px-4 py-2 font-black text-xs uppercase flex items-center gap-1.5 transition-all ${
+            className={`px-3.5 py-2 font-black text-xs uppercase flex items-center gap-1.5 min-h-[44px] transition-all ${
               activeTab === 'code'
                 ? 'bg-[#FF007A] text-white border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
                 : 'text-white hover:bg-gray-800'
             }`}
           >
-            <Code2 className="w-4 h-4" />
+            <Code2 className="w-4 h-4 shrink-0" />
             CODE SNIPPETS
           </button>
 
           <button
             onClick={() => setActiveTab('docs')}
-            className={`px-4 py-2 font-black text-xs uppercase flex items-center gap-1.5 transition-all ${
+            className={`px-3.5 py-2 font-black text-xs uppercase flex items-center gap-1.5 min-h-[44px] transition-all ${
               activeTab === 'docs'
                 ? 'bg-[#06B6D4] text-black border-2 border-black shadow-[2px_2px_0px_0px_#FFF]'
                 : 'text-white hover:bg-gray-800'
             }`}
           >
-            <Terminal className="w-4 h-4" />
+            <Terminal className="w-4 h-4 shrink-0" />
             API DOCS & TESTER
           </button>
         </div>
@@ -138,44 +138,44 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           href={`/api${currentIp ? `/${currentIp}` : ''}`}
           target="_blank"
           rel="noreferrer"
-          className="bg-[#22C55E] text-black border-2 border-black px-3 py-1 text-xs font-black uppercase flex items-center gap-1 hover:bg-[#4ADE80]"
+          className="bg-[#22C55E] text-black border-2 border-black px-3.5 py-2 text-xs font-black uppercase flex items-center justify-center gap-1.5 min-h-[44px] hover:bg-[#4ADE80] shrink-0"
         >
-          <ExternalLink className="w-3.5 h-3.5" />
+          <ExternalLink className="w-3.5 h-3.5 shrink-0" />
           Test Endpoint
         </a>
       </div>
 
       {/* Tab 1: Raw JSON */}
       {activeTab === 'json' && (
-        <div className="p-4 space-y-3">
-          <div className="flex items-center justify-between gap-2">
+        <div className="p-3.5 sm:p-4 space-y-3">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
             <div className="text-xs font-mono font-black text-black flex items-center gap-2">
-              <span className="bg-[#22C55E] text-black px-2 py-0.5 border border-black">
+              <span className="bg-[#22C55E] text-black px-2 py-0.5 border border-black shrink-0">
                 200 OK
               </span>
-              <span>Content-Type: application/json</span>
+              <span className="break-all">Content-Type: application/json</span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <button
                 onClick={handleCopyJson}
-                className="neo-btn bg-[#FFE600] text-black px-3 py-1.5 text-xs font-black flex items-center gap-1"
+                className="neo-btn bg-[#FFE600] text-black px-3 py-2 text-xs min-h-[44px] font-black flex items-center gap-1.5"
               >
-                {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
+                {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                 {copiedCode ? 'COPIED!' : 'COPY JSON'}
               </button>
 
               <button
                 onClick={handleDownloadJson}
-                className="neo-btn bg-[#A855F7] text-white px-3 py-1.5 text-xs font-black flex items-center gap-1"
+                className="neo-btn bg-[#A855F7] text-white px-3 py-2 text-xs min-h-[44px] font-black flex items-center gap-1.5"
               >
-                <Download className="w-3.5 h-3.5" />
+                <Download className="w-4 h-4" />
                 DOWNLOAD .JSON
               </button>
             </div>
           </div>
 
-          <pre className="bg-[#18181B] text-[#00FF66] p-4 font-mono text-xs md:text-sm overflow-x-auto border-3 border-black max-h-[420px]">
+          <pre className="bg-[#18181B] text-[#00FF66] p-3.5 sm:p-4 font-mono text-xs md:text-sm overflow-x-auto border-3 border-black max-h-[420px]">
             {jsonString}
           </pre>
         </div>
@@ -183,13 +183,13 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
 
       {/* Tab 2: Code Generators */}
       {activeTab === 'code' && (
-        <div className="p-4 space-y-4">
+        <div className="p-3.5 sm:p-4 space-y-4">
           <div className="flex flex-wrap items-center gap-2">
             {(['curl', 'js', 'python', 'php', 'go'] as const).map((lang) => (
               <button
                 key={lang}
                 onClick={() => setActiveLang(lang)}
-                className={`neo-btn px-3 py-1.5 text-xs font-black uppercase ${
+                className={`neo-btn px-3.5 py-2 text-xs min-h-[44px] font-black uppercase ${
                   activeLang === lang
                     ? 'bg-[#FF007A] text-white'
                     : 'bg-gray-100 text-black hover:bg-gray-200'
@@ -201,7 +201,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           </div>
 
           <div className="relative">
-            <pre className="bg-[#18181B] text-white p-4 font-mono text-xs md:text-sm overflow-x-auto border-3 border-black">
+            <pre className="bg-[#18181B] text-white p-3.5 sm:p-4 font-mono text-xs md:text-sm overflow-x-auto border-3 border-black">
               {getCodeSnippet()}
             </pre>
 
@@ -211,10 +211,10 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
                 setCopiedCode(true);
                 setTimeout(() => setCopiedCode(false), 2000);
               }}
-              className="absolute top-3 right-3 neo-btn bg-[#FFE600] text-black px-3 py-1 text-xs font-black flex items-center gap-1"
+              className="mt-2 sm:mt-0 sm:absolute sm:top-3 sm:right-3 neo-btn bg-[#FFE600] text-black px-3 py-2 min-h-[44px] text-xs font-black flex items-center justify-center gap-1.5 w-full sm:w-auto"
             >
-              {copiedCode ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-              {copiedCode ? 'COPIED' : 'COPY'}
+              {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+              {copiedCode ? 'COPIED' : 'COPY CODE'}
             </button>
           </div>
         </div>
@@ -222,7 +222,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
 
       {/* Tab 3: API Docs & Interactive Playground */}
       {activeTab === 'docs' && (
-        <div className="p-4 space-y-5">
+        <div className="p-3.5 sm:p-4 space-y-5">
           {/* Endpoint Specification Table */}
           <div className="space-y-3">
             <h3 className="text-sm font-black uppercase text-black flex items-center gap-2">
@@ -231,7 +231,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
             </h3>
 
             <div className="overflow-x-auto border-3 border-black">
-              <table className="w-full text-left font-mono text-xs border-collapse">
+              <table className="w-full text-left font-mono text-xs border-collapse min-w-[500px]">
                 <thead className="bg-[#FFE600] text-black border-b-2 border-black font-sans font-black uppercase">
                   <tr>
                     <th className="p-2.5 border-r-2 border-black">Method</th>
@@ -271,7 +271,7 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
           </div>
 
           {/* Field filtering playground */}
-          <div className="neo-box bg-[#FFFDF5] p-4 space-y-3">
+          <div className="neo-box bg-[#FFFDF5] p-3.5 sm:p-4 space-y-3">
             <h4 className="text-xs font-black uppercase text-black flex items-center gap-1.5">
               <Sparkles className="w-4 h-4 text-[#A855F7]" />
               INTERACTIVE FIELD FILTER TESTER (?fields=...)
@@ -280,20 +280,20 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
               You can request specific response fields by passing a comma-separated list to <code className="bg-black text-white px-1">?fields=</code>.
             </p>
 
-            <div className="flex flex-col sm:flex-row items-stretch gap-2">
+            <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
               <input
                 type="text"
                 value={testFieldQuery}
                 onChange={(e) => setTestFieldQuery(e.target.value)}
                 placeholder="e.g. status,country,city,lat,lon,query"
-                className="flex-1 bg-white border-2 border-black p-2 font-mono text-xs font-bold focus:outline-none"
+                className="flex-1 bg-white border-2 border-black p-2.5 min-h-[44px] font-mono text-xs font-bold focus:outline-none"
               />
               <button
                 onClick={handleRunPlaygroundTest}
                 disabled={isTesting}
-                className="neo-btn bg-[#22C55E] text-black px-4 py-2 font-black text-xs uppercase flex items-center justify-center gap-1"
+                className="neo-btn bg-[#22C55E] text-black px-4 py-2.5 min-h-[44px] font-black text-xs uppercase flex items-center justify-center gap-1.5"
               >
-                <Play className="w-3.5 h-3.5 fill-current" />
+                <Play className="w-4 h-4 fill-current shrink-0" />
                 {isTesting ? 'EXECUTING...' : 'RUN REQUEST'}
               </button>
             </div>
