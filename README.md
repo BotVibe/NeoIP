@@ -12,6 +12,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
    - Real-time client IP auto-detection & custom IP/domain lookup.
    - Detailed breakdown (Country, Region, City, ZIP, Coordinates, Timezone with local time, ISP, Org, AS).
    - Collapsible Developer & API Tools section (hidden by default) with Raw JSON, code snippet generator (cURL, JavaScript, Python, PHP, Go), and interactive field sandbox (`?fields=...`).
+   - Custom SVG favicon and full SEO metadata (Open Graph, Twitter Cards, JSON-LD structured data).
    - Centered GitHub repository button in the footer.
 
 2. **API Endpoint (`/api`, `/json`, `/api/:query`, `/json/:query`)**:

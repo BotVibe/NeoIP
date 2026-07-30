@@ -22,6 +22,7 @@ This project is a full-stack IP Geolocation web service and API developed with E
   - Handles `/api`, `/json`, `/api/:query`, `/json/:query` endpoints.
   - Proxies geolocation requests to `ip-api.com` with a fallback mechanism to `ipwho.is` and in-memory TTL caching.
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
+- **`index.html`**: Entry html file with custom Neo-brutalist SVG favicon (`/public/favicon.svg`), Open Graph, Twitter Cards, theme color, and JSON-LD WebApplication structured data.
 - **`src/App.tsx`**: Single-page application rendering the Neo-brutalist dashboard with a centered GitHub repository link in the footer and a collapsible Developer Tools section (hidden by default).
 - **`src/components/`**:
   - `Header.tsx`: Title banner, caller IP lookup trigger, and search bar (mobile touch optimized, quick presets removed).
