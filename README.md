@@ -31,7 +31,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 | :--- | :--- | :--- | :--- |
 | `/api` | `GET` | Geolocation of the client caller IP | `/api` |
 | `/json` | `GET` | Alias endpoint matching `ip-api.com` path | `/json` |
-| `/api/:query` | `GET` | Geolocation for a target IP address or domain | `/api/170.205.81.42` |
+| `/api/:query` | `GET` | Geolocation for a target IP address or domain | `/api/192.178.25.206` |
 | `/json/:query` | `GET` | Alias endpoint for target IP or domain | `/json/google.com` |
 
 ---
@@ -41,19 +41,19 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 ```json
 {
   "status": "success",
-  "country": "Switzerland",
-  "countryCode": "CH",
-  "region": "JU",
-  "regionName": "Jura",
-  "city": "Delémont",
-  "zip": "2800",
-  "lat": 47.3672,
-  "lon": 7.3417,
-  "timezone": "Europe/Zurich",
-  "isp": "Swisscom (Schweiz) AG",
-  "org": "Swisscom (Schweiz) AG",
-  "as": "AS3303 Swisscom (Switzerland) Ltd",
-  "query": "170.205.81.42"
+  "country": "United States",
+  "countryCode": "US",
+  "region": "CA",
+  "regionName": "California",
+  "city": "Mountain View",
+  "zip": "94043",
+  "lat": 37.4225,
+  "lon": -122.085,
+  "timezone": "America/Los_Angeles",
+  "isp": "Google LLC",
+  "org": "Google LLC",
+  "as": "AS15169 Google LLC",
+  "query": "192.178.25.206"
 }
 ```
 
