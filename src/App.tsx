@@ -64,8 +64,40 @@ export default function App() {
         setCurrentQuery(data.query);
       }
     } catch (err: any) {
-      console.error('Error fetching IP data:', err);
-      // Fallback sample data matching user's prompt (Delémont, Switzerland) if server error
+      console.error('Error fetching IP data from server API, attempting browser direct fallback:', err);
+      try {
+        const fallbackRes = await fetch(query ? `https://ipwho.is/${encodeURIComponent(query)}` : 'https://ipwho.is/');
+        if (fallbackRes.ok) {
+          const fallbackJson = await fallbackRes.json();
+          if (fallbackJson && fallbackJson.success) {
+            const formatted: GeoResponse = {
+              status: 'success',
+              country: fallbackJson.country || '',
+              countryCode: fallbackJson.country_code || '',
+              region: fallbackJson.region_code || '',
+              regionName: fallbackJson.region || '',
+              city: fallbackJson.city || '',
+              zip: fallbackJson.postal || '',
+              lat: fallbackJson.latitude || 0,
+              lon: fallbackJson.longitude || 0,
+              timezone: fallbackJson.timezone?.id || '',
+              isp: fallbackJson.connection?.isp || fallbackJson.connection?.org || '',
+              org: fallbackJson.connection?.org || fallbackJson.connection?.isp || '',
+              as: fallbackJson.connection?.asn ? `AS${fallbackJson.connection.asn} ${fallbackJson.connection.org || ''}` : '',
+              query: fallbackJson.ip || query || ''
+            };
+            setGeoData(formatted);
+            if (formatted.query) {
+              setCurrentQuery(formatted.query);
+            }
+            return;
+          }
+        }
+      } catch (clientFallbackErr) {
+        console.error('Client direct fallback failed:', clientFallbackErr);
+      }
+
+      // Emergency static fallback if network is completely offline
       setGeoData({
         status: 'success',
         country: 'Switzerland',

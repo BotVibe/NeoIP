@@ -20,7 +20,7 @@ This project is a full-stack IP Geolocation web service and API developed with E
 
 - **`server.ts`**: Express backend server running on port `3000` (host `0.0.0.0`).
   - Implements production-grade security and optimization (`helmet` for headers, `compression` for gzipping, `express-rate-limit` for DDoS prevention).
-  - Configured with `app.set('trust proxy', true)` and multi-header client IP extraction (`cf-connecting-ip`, `true-client-ip`, `x-real-ip`, `x-forwarded-for`, etc.) to accurately detect the client's public IP behind reverse proxies like Dokploy, Traefik, Nginx, and Cloudflare.
+  - Configured with `app.set('trust proxy', true)` and multi-header client IP extraction (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` prioritized before `x-real-ip`, RFC 7239 `forwarded`, etc.) to accurately detect the client's public IP behind multi-layer reverse proxies like Dokploy, Traefik, Nginx, and Cloudflare.
   - Handles `/api`, `/json`, `/api/:query`, `/json/:query` endpoints.
   - Proxies geolocation requests to `ip-api.com` with a fallback mechanism to `ipwho.is` and in-memory TTL caching.
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
@@ -83,5 +83,5 @@ export interface GeoResponse {
   - `build`: `vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs`
   - `start`: `node dist/server.cjs`
 - Deployment Configuration (`nixpacks.toml` & `railway.json`):
-  - Uses modern `NPM_CONFIG_OMIT="dev"` and `NPM_CONFIG_PRODUCTION=""` to suppress legacy `npm warn config production` warnings during Railpack build phases.
+  - Configured with `NIXPACKS_NODE_VERSION = "22"` and Node `>=20.0.0` engine specification to enforce Node.js 22 runtime during Nixpacks/Railpack container builds, ensuring full compatibility with `@tailwindcss/oxide` native binary bindings and Vite 6.
 

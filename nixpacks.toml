@@ -1,10 +1,9 @@
-# Railpack / Nixpacks configuration for Railway deployment
+# Railpack / Nixpacks configuration for Railway & Dokploy deployment
 [variables]
-NPM_CONFIG_PRODUCTION = ""
-NPM_CONFIG_OMIT = "dev"
+NIXPACKS_NODE_VERSION = "22"
 
 [phases.install]
-cmds = ["npm ci --omit=dev"]
+cmds = ["npm ci"]
 
 [phases.build]
 cmds = ["npm run build"]

@@ -3,12 +3,11 @@
   "build": {
     "nixpacksPlan": {
       "variables": {
-        "NPM_CONFIG_PRODUCTION": "",
-        "NPM_CONFIG_OMIT": "dev"
+        "NIXPACKS_NODE_VERSION": "22"
       },
       "phases": {
         "install": {
-          "cmds": ["npm ci --omit=dev"]
+          "cmds": ["npm ci"]
         }
       }
     }

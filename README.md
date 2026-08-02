@@ -19,7 +19,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 
 2. **API Endpoint (`/api`, `/json`, `/api/:query`, `/json/:query`)**:
    - Production-hardened with `helmet` for security headers, gzip compression, and API rate limiting (300 requests / 15 min per IP).
-   - Configured with `app.set('trust proxy', true)` and multi-header extraction (`cf-connecting-ip`, `true-client-ip`, `x-real-ip`, `x-forwarded-for`, etc.) to accurately detect caller IPs behind multi-layer reverse proxies (Dokploy, Traefik, Nginx, Cloudflare).
+   - Configured with `app.set('trust proxy', true)` and multi-header extraction (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` prioritized before `x-real-ip`, etc.) to accurately detect caller IPs behind multi-layer reverse proxies (Dokploy, Traefik, Nginx, Cloudflare).
    - Returns strict raw JSON adhering to the `ip-api.com/json` schema.
    - Supports cross-origin requests (CORS enabled).
    - Supports field filtering via `?fields=status,country,city,lat,lon,query`.
@@ -32,7 +32,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 | :--- | :--- | :--- | :--- |
 | `/api` | `GET` | Geolocation of the client caller IP | `/api` |
 | `/json` | `GET` | Alias endpoint matching `ip-api.com` path | `/json` |
-| `/api/:query` | `GET` | Geolocation for a target IP address or domain | `/api/170.205.81.42` |
+| `/api/:query` | `GET` | Geolocation for a target IP address or domain | `/api/192.178.223.101` |
 | `/json/:query` | `GET` | Alias endpoint for target IP or domain | `/json/google.com` |
 
 ---
@@ -42,19 +42,19 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 ```json
 {
   "status": "success",
-  "country": "Switzerland",
-  "countryCode": "CH",
-  "region": "JU",
-  "regionName": "Jura",
-  "city": "Delémont",
-  "zip": "2800",
-  "lat": 47.3672,
-  "lon": 7.3417,
-  "timezone": "Europe/Zurich",
-  "isp": "Swisscom (Schweiz) AG",
-  "org": "Swisscom (Schweiz) AG",
-  "as": "AS3303 Swisscom (Switzerland) Ltd",
-  "query": "170.205.81.42"
+  "country": "United States",
+  "countryCode": "US",
+  "region": "CA",
+  "regionName": "California",
+  "city": "Mountain View",
+  "zip": "94043",
+  "lat": 37.4225,
+  "lon": -122.085,
+  "timezone": "America/Los_Angeles",
+  "isp": "Google LLC",
+  "org": "Google LLC",
+  "as": "AS15169 Google LLC",
+  "query": "192.178.223.101"
 }
 ```
 
@@ -78,7 +78,7 @@ npm run start
 
 ### 🚂 Railway & Railpack Deployment
 
-The repository includes `nixpacks.toml` and `railway.json` configured with `NPM_CONFIG_OMIT="dev"` and `NPM_CONFIG_PRODUCTION=""` to suppress legacy `npm warn config production Use --omit=dev instead.` warnings during Railpack build phases.
+The repository includes `nixpacks.toml` and `railway.json` configured with `NIXPACKS_NODE_VERSION = "22"` and Node `>=20.0.0` engine enforcement. This ensures Nixpacks/Railpack builds use Node.js 22, enabling native binary compatibility for `@tailwindcss/oxide` and full support for Vite 6 build scripts.
 
 ---
 

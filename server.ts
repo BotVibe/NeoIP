@@ -27,6 +27,8 @@ const apiLimiter = rateLimit({
   max: 300, // Limit each IP to 300 requests per windowMs
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { trustProxy: false },
+  keyGenerator: (req) => getClientIp(req) || req.ip || '127.0.0.1',
   message: { status: 'fail', message: 'Too many requests, please try again later.' }
 });
 
@@ -64,15 +66,51 @@ interface GeoResponse {
 const cache = new Map<string, { data: GeoResponse; timestamp: number }>();
 const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
 
+function cleanIpString(rawIp: string): string {
+  if (!rawIp) return '';
+  let ip = rawIp.trim();
+
+  // Handle RFC 7239 Forwarded header "for=" prefix
+  if (ip.toLowerCase().startsWith('for=')) {
+    ip = ip.substring(4);
+  }
+
+  // Strip surrounding quotes
+  ip = ip.replace(/^["']|["']$/g, '').trim();
+
+  // Handle square brackets around IPv6, e.g. [2001:db8::1] or [2001:db8::1]:8080
+  if (ip.startsWith('[')) {
+    const bracketEnd = ip.indexOf(']');
+    if (bracketEnd !== -1) {
+      ip = ip.substring(1, bracketEnd);
+    }
+  } else {
+    // If IPv4 with port, e.g. 203.0.113.195:49152, strip the port
+    if (/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d+$/.test(ip)) {
+      ip = ip.split(':')[0];
+    }
+  }
+
+  // Strip ::ffff: IPv4-mapped IPv6 prefix
+  ip = ip.replace(/^::ffff:/i, '').trim();
+
+  return ip;
+}
+
 function isPrivateIp(ip: string): boolean {
   if (!ip) return true;
-  const cleanIp = ip.replace(/^::ffff:/, '').trim();
-  if (!cleanIp || cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost') return true;
-  if (cleanIp.startsWith('10.') || cleanIp.startsWith('192.168.')) return true;
-  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(cleanIp)) return true;
-  if (/^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(cleanIp)) return true;
-  if (cleanIp.startsWith('169.254.')) return true;
-  if (/^fc00:|^fe80:|^fd/i.test(cleanIp)) return true;
+  const clean = cleanIpString(ip);
+  if (!clean || clean === '127.0.0.1' || clean === '::1' || clean === 'localhost' || clean === '0.0.0.0') return true;
+
+  // Private IPv4 ranges
+  if (clean.startsWith('10.') || clean.startsWith('192.168.')) return true;
+  if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(clean)) return true; // 172.16.0.0 - 172.31.255.255
+  if (/^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(clean)) return true; // 100.64.0.0/10 Carrier Grade NAT
+  if (clean.startsWith('169.254.')) return true; // Link-local
+
+  // Private / Reserved IPv6 ranges
+  if (/^(fc|fd|fe80|ff00):/i.test(clean)) return true;
+
   return false;
 }
 
@@ -81,41 +119,46 @@ function extractIpCandidates(headerValue: string | string[] | undefined): string
   const rawStr = Array.isArray(headerValue) ? headerValue.join(',') : headerValue;
   return rawStr
     .split(',')
-    .map((s) => s.trim().replace(/^::ffff:/, ''))
+    .map((s) => cleanIpString(s))
     .filter((s) => s.length > 0);
 }
 
 function getClientIp(req: Request): string {
-  // Check headers in order of priority for reverse proxies (Dokploy/Traefik/Nginx/Cloudflare/etc.)
+  // CRITICAL HEADER ORDER:
+  // 1. cf-connecting-ip (Cloudflare edge client IP)
+  // 2. true-client-ip (Akamai/Cloudflare client IP)
+  // 3. x-forwarded-for (FIRST entry is original client IP; must be checked BEFORE x-real-ip
+  //    because reverse proxies like Traefik/Dokploy set x-real-ip to the server's own public IP!)
+  // 4. forwarded (RFC 7239)
+  // 5. x-real-ip
+  // 6. x-client-ip
+  // 7. fastly-client-ip
+  // 8. x-cluster-client-ip
   const headerKeys = [
     'cf-connecting-ip',
     'true-client-ip',
+    'x-forwarded-for',
+    'forwarded',
     'x-real-ip',
     'x-client-ip',
     'fastly-client-ip',
-    'x-cluster-client-ip',
-    'x-forwarded-for',
-    'forwarded'
+    'x-cluster-client-ip'
   ];
 
   for (const key of headerKeys) {
     const headerVal = req.headers[key];
     const candidates = extractIpCandidates(headerVal);
     for (const candidate of candidates) {
-      let clean = candidate;
-      if (clean.toLowerCase().startsWith('for=')) {
-        clean = clean.substring(4).replace(/^"|"$/g, '');
-      }
-      if (clean && !isPrivateIp(clean)) {
-        return clean;
+      if (candidate && !isPrivateIp(candidate)) {
+        return candidate;
       }
     }
   }
 
-  // Fallback to Express req.ips array (populated when trust proxy is enabled)
+  // Fallback to Express req.ips array (populated when trust proxy is enabled from X-Forwarded-For left to right)
   if (req.ips && Array.isArray(req.ips)) {
     for (const ip of req.ips) {
-      const clean = ip.replace(/^::ffff:/, '').trim();
+      const clean = cleanIpString(ip);
       if (clean && !isPrivateIp(clean)) {
         return clean;
       }
@@ -124,7 +167,7 @@ function getClientIp(req: Request): string {
 
   // Fallback to Express req.ip
   if (req.ip) {
-    const clean = req.ip.replace(/^::ffff:/, '').trim();
+    const clean = cleanIpString(req.ip);
     if (clean && !isPrivateIp(clean)) {
       return clean;
     }
@@ -132,7 +175,7 @@ function getClientIp(req: Request): string {
 
   // Fallback to socket remoteAddress
   const remoteAddr = req.socket?.remoteAddress || '';
-  const cleanRemote = remoteAddr.replace(/^::ffff:/, '').trim();
+  const cleanRemote = cleanIpString(remoteAddr);
   if (cleanRemote && !isPrivateIp(cleanRemote)) {
     return cleanRemote;
   }
