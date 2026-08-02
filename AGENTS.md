@@ -20,6 +20,7 @@ This project is a full-stack IP Geolocation web service and API developed with E
 
 - **`server.ts`**: Express backend server running on port `3000` (host `0.0.0.0`).
   - Implements production-grade security and optimization (`helmet` for headers, `compression` for gzipping, `express-rate-limit` for DDoS prevention).
+  - Configured with `app.set('trust proxy', true)` and multi-header client IP extraction (`cf-connecting-ip`, `true-client-ip`, `x-real-ip`, `x-forwarded-for`, etc.) to accurately detect the client's public IP behind reverse proxies like Dokploy, Traefik, Nginx, and Cloudflare.
   - Handles `/api`, `/json`, `/api/:query`, `/json/:query` endpoints.
   - Proxies geolocation requests to `ip-api.com` with a fallback mechanism to `ipwho.is` and in-memory TTL caching.
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
@@ -28,7 +29,7 @@ This project is a full-stack IP Geolocation web service and API developed with E
 - **`src/components/`**:
   - `Header.tsx`: Title banner, caller IP lookup trigger, search bar, and integrated non-shifting bottom progress bar loader.
   - `InfoCard.tsx`: Formatted geolocation details with single-click copy buttons, updating indicator pill, and dimmed dark-mode badges.
-  - `MapComponent.tsx`: Leaflet interactive map with custom Neo-brutalist marker.
+  - `MapComponent.tsx`: Leaflet interactive map with custom Neo-brutalist marker and high-availability CARTO Voyager tile layer (powered by OpenStreetMap data).
   - `TabsSection.tsx`: Raw JSON viewer, multilingual code snippet generator, and interactive field tester with touch-friendly controls (toggled on-demand).
 
 ---
@@ -81,3 +82,6 @@ export interface GeoResponse {
   - `dev`: `tsx server.ts`
   - `build`: `vite build && esbuild server.ts --bundle --platform=node --format=cjs --packages=external --sourcemap --outfile=dist/server.cjs`
   - `start`: `node dist/server.cjs`
+- Deployment Configuration (`nixpacks.toml` & `railway.json`):
+  - Uses modern `NPM_CONFIG_OMIT="dev"` and `NPM_CONFIG_PRODUCTION=""` to suppress legacy `npm warn config production` warnings during Railpack build phases.
+

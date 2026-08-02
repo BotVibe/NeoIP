@@ -8,8 +8,8 @@ import rateLimit from 'express-rate-limit';
 const app = express();
 const PORT = 3000;
 
-// Trust the proxy to get correct client IP behind load balancers (like Cloud Run)
-app.set('trust proxy', 1);
+// Trust proxies to get correct client IP behind multi-layer load balancers (Dokploy, Traefik, Nginx, Cloudflare, Cloud Run)
+app.set('trust proxy', true);
 
 // Apply security headers
 app.use(helmet({
@@ -66,32 +66,78 @@ const CACHE_TTL_MS = 5 * 60 * 1000; // 5 minutes cache
 
 function isPrivateIp(ip: string): boolean {
   if (!ip) return true;
-  const cleanIp = ip.replace(/^::ffff:/, '');
-  if (cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost') return true;
+  const cleanIp = ip.replace(/^::ffff:/, '').trim();
+  if (!cleanIp || cleanIp === '127.0.0.1' || cleanIp === '::1' || cleanIp === 'localhost') return true;
   if (cleanIp.startsWith('10.') || cleanIp.startsWith('192.168.')) return true;
   if (/^172\.(1[6-9]|2[0-9]|3[0-1])\./.test(cleanIp)) return true;
+  if (/^100\.(6[4-9]|[7-9][0-9]|1[0-1][0-9]|12[0-7])\./.test(cleanIp)) return true;
+  if (cleanIp.startsWith('169.254.')) return true;
+  if (/^fc00:|^fe80:|^fd/i.test(cleanIp)) return true;
   return false;
 }
 
+function extractIpCandidates(headerValue: string | string[] | undefined): string[] {
+  if (!headerValue) return [];
+  const rawStr = Array.isArray(headerValue) ? headerValue.join(',') : headerValue;
+  return rawStr
+    .split(',')
+    .map((s) => s.trim().replace(/^::ffff:/, ''))
+    .filter((s) => s.length > 0);
+}
+
 function getClientIp(req: Request): string {
-  const xForwardedFor = req.headers['x-forwarded-for'];
-  if (xForwardedFor) {
-    const ips = (Array.isArray(xForwardedFor) ? xForwardedFor[0] : xForwardedFor).split(',');
-    const firstIp = ips[0].trim();
-    if (firstIp && !isPrivateIp(firstIp)) {
-      return firstIp;
+  // Check headers in order of priority for reverse proxies (Dokploy/Traefik/Nginx/Cloudflare/etc.)
+  const headerKeys = [
+    'cf-connecting-ip',
+    'true-client-ip',
+    'x-real-ip',
+    'x-client-ip',
+    'fastly-client-ip',
+    'x-cluster-client-ip',
+    'x-forwarded-for',
+    'forwarded'
+  ];
+
+  for (const key of headerKeys) {
+    const headerVal = req.headers[key];
+    const candidates = extractIpCandidates(headerVal);
+    for (const candidate of candidates) {
+      let clean = candidate;
+      if (clean.toLowerCase().startsWith('for=')) {
+        clean = clean.substring(4).replace(/^"|"$/g, '');
+      }
+      if (clean && !isPrivateIp(clean)) {
+        return clean;
+      }
     }
   }
-  const realIp = req.headers['x-real-ip'];
-  if (realIp && typeof realIp === 'string' && !isPrivateIp(realIp)) {
-    return realIp;
+
+  // Fallback to Express req.ips array (populated when trust proxy is enabled)
+  if (req.ips && Array.isArray(req.ips)) {
+    for (const ip of req.ips) {
+      const clean = ip.replace(/^::ffff:/, '').trim();
+      if (clean && !isPrivateIp(clean)) {
+        return clean;
+      }
+    }
   }
-  const remoteAddr = req.socket.remoteAddress || '';
-  const cleanRemote = remoteAddr.replace(/^::ffff:/, '');
-  if (!isPrivateIp(cleanRemote)) {
+
+  // Fallback to Express req.ip
+  if (req.ip) {
+    const clean = req.ip.replace(/^::ffff:/, '').trim();
+    if (clean && !isPrivateIp(clean)) {
+      return clean;
+    }
+  }
+
+  // Fallback to socket remoteAddress
+  const remoteAddr = req.socket?.remoteAddress || '';
+  const cleanRemote = remoteAddr.replace(/^::ffff:/, '').trim();
+  if (cleanRemote && !isPrivateIp(cleanRemote)) {
     return cleanRemote;
   }
-  return ''; // Return empty string to trigger default self IP lookup from upstream
+
+  return '';
 }
 
 async function fetchGeoData(queryIp: string): Promise<GeoResponse> {
