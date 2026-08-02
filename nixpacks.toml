@@ -1,0 +1,13 @@
+# Railpack / Nixpacks configuration for Railway deployment
+[variables]
+NPM_CONFIG_PRODUCTION = ""
+NPM_CONFIG_OMIT = "dev"
+
+[phases.install]
+cmds = ["npm ci --omit=dev"]
+
+[phases.build]
+cmds = ["npm run build"]
+
+[start]
+cmd = "npm start"
