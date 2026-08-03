@@ -284,23 +284,19 @@ async function handleApiRequest(req: Request, res: Response) {
 }
 
 // Routes
+app.get('/api/client-info', apiLimiter, (req, res) => {
+  res.json({
+    clientIp: getClientIp(req),
+    headers: req.headers
+  });
+});
+
 app.get('/api', apiLimiter, handleApiRequest);
 app.get('/api/json', apiLimiter, handleApiRequest);
 app.get('/json', apiLimiter, handleApiRequest);
 app.get('/api/json/:query', apiLimiter, handleApiRequest);
 app.get('/api/:query', apiLimiter, handleApiRequest);
 app.get('/json/:query', apiLimiter, handleApiRequest);
-
-app.get('/api/client-info', apiLimiter, (req, res) => {
-  res.json({
-    clientIp: getClientIp(req),
-    headers: {
-      'user-agent': req.headers['user-agent'],
-      'x-forwarded-for': req.headers['x-forwarded-for'],
-      'accept-language': req.headers['accept-language']
-    }
-  });
-});
 
 async function startServer() {
   if (process.env.NODE_ENV !== 'production') {

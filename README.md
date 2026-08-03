@@ -80,6 +80,43 @@ npm run start
 
 The repository includes `nixpacks.toml` and `railway.json` configured with `NIXPACKS_NODE_VERSION = "22"` and Node `>=20.0.0` engine enforcement. This ensures Nixpacks/Railpack builds use Node.js 22, enabling native binary compatibility for `@tailwindcss/oxide` and full support for Vite 6 build scripts.
 
+### 🐳 Dokploy Deployment (Fixing Client IP)
+
+When deploying to Dokploy (which uses Traefik by default), you may find that the client IP is incorrectly reported as the server's IP or an internal Docker gateway IP. This happens because Traefik doesn't trust forwarded headers by default.
+
+To fix this, you need to configure Traefik in Dokploy to trust incoming headers.
+
+**Option 1: Traefik Labels (if deploying as Docker Compose in Dokploy)**
+Add the following labels to your Traefik proxy configuration or to the service itself:
+```yaml
+labels:
+  - "traefik.http.middlewares.my-trust-forward.forwardedheaders.insecure=true"
+  # Or, to be more secure, trust the specific IP range of your load balancer/CDN
+  # - "traefik.http.middlewares.my-trust-forward.forwardedheaders.trustedips=127.0.0.1/32,10.0.0.0/8"
+  - "traefik.http.routers.YOUR_ROUTER_NAME.middlewares=my-trust-forward"
+```
+
+**Option 2: Network Mode Host (Simpler fallback)**
+If you are running a single application and want to bypass the proxy's IP masking, you can set the network mode to `host` in your Dokploy advanced settings or Docker Compose:
+```yaml
+network_mode: "host"
+```
+
+**Option 3: Global Traefik Config (Dokploy Traefik override)**
+If you have access to modify the Traefik entrypoints on your Dokploy server, update the `traefik.yml` or CLI args to include:
+```yaml
+entryPoints:
+  web:
+    address: ":80"
+    forwardedHeaders:
+      insecure: true
+  websecure:
+    address: ":443"
+    forwardedHeaders:
+      insecure: true
+```
+This tells Traefik to accept the `X-Forwarded-For` header from the outside world, allowing Node.js to read the real client IP.
+
 ---
 
 ## ⚠️ MAINTENANCE NOTE FOR AGENTS & DEVELOPERS
