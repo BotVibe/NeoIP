@@ -3,7 +3,7 @@ import path from 'path';
 import { createServer as createViteServer } from 'vite';
 import helmet from 'helmet';
 import compression from 'compression';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 const app = express();
 const PORT = 3000;
@@ -28,7 +28,7 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   validate: { trustProxy: false },
-  keyGenerator: (req) => getClientIp(req) || req.ip || '127.0.0.1',
+  keyGenerator: (req) => ipKeyGenerator(getClientIp(req) || req.ip || '127.0.0.1'),
   message: { status: 'fail', message: 'Too many requests, please try again later.' }
 });
 
