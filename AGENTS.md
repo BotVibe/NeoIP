@@ -21,7 +21,7 @@ This project is a full-stack IP Geolocation web service and API developed with E
 - **`server.ts`**: Express backend server running on port `3000` (host `0.0.0.0`).
   - Implements production-grade security and optimization (`helmet` for headers, `compression` for gzipping, `express-rate-limit` for DDoS prevention).
   - Configured with `app.set('trust proxy', true)` and multi-header client IP extraction (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` prioritized before `x-real-ip`, RFC 7239 `forwarded`, etc.) to accurately detect the client's public IP behind multi-layer reverse proxies like Dokploy, Traefik, Nginx, and Cloudflare.
-  - Handles `/api`, `/json`, `/api/:query`, `/json/:query` endpoints.
+  - Handles `/api`, `/json`, `/api/json`, `/api/:query`, `/json/:query`, `/api/json/:query` endpoints, plus a `/api/client-info` debug endpoint that returns the resolved caller IP and raw request headers.
   - Proxies geolocation requests to `ip-api.com` with a fallback mechanism to `ipwho.is` and in-memory TTL caching.
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
 - **`index.html`**: Entry html file with custom Neo-brutalist SVG favicon (`/public/favicon.svg`), Open Graph, Twitter Cards, theme color, and JSON-LD WebApplication structured data.
