@@ -32,8 +32,11 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 | :--- | :--- | :--- | :--- |
 | `/api` | `GET` | Geolocation of the client caller IP | `/api` |
 | `/json` | `GET` | Alias endpoint matching `ip-api.com` path | `/json` |
+| `/api/json` | `GET` | Alias endpoint, same as `/api` | `/api/json` |
 | `/api/:query` | `GET` | Geolocation for a target IP address or domain | `/api/192.178.223.101` |
 | `/json/:query` | `GET` | Alias endpoint for target IP or domain | `/json/google.com` |
+| `/api/json/:query` | `GET` | Alias endpoint for target IP or domain | `/api/json/google.com` |
+| `/api/client-info` | `GET` | Debug endpoint: returns the resolved caller IP and raw request headers (useful for diagnosing reverse-proxy header issues) | `/api/client-info` |
 
 ---
 

@@ -2,5 +2,5 @@
   "name": "IP Geolocation API & Lookup Service",
   "description": "Neo-brutalist IP geolocation web service and JSON API endpoint compatible with ip-api.com response structure.",
   "requestFramePermissions": [],
-  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+  "majorCapabilities": []
 }
