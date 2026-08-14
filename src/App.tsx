@@ -4,6 +4,8 @@ import { Header } from './components/Header';
 import { InfoCard } from './components/InfoCard';
 import { MapComponent } from './components/MapComponent';
 import { TabsSection } from './components/TabsSection';
+import { DualStackBanner } from './components/DualStackBanner';
+import { detectDualStackIps } from './utils/detectDualStackIps';
 import {
   ShieldCheck,
   Sparkles,
@@ -24,7 +26,9 @@ export default function App() {
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [showDevTools, setShowDevTools] = useState<boolean>(false);
-  
+  const [dualStack, setDualStack] = useState<{ ipv4: GeoResponse; ipv6: GeoResponse } | null>(null);
+  const [activeFamily, setActiveFamily] = useState<'ipv4' | 'ipv6'>('ipv4');
+
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
       return localStorage.getItem('theme') === 'dark' ||
@@ -122,17 +126,52 @@ export default function App() {
     }
   }, []);
 
+  // Detects the client's own public IPv4/IPv6 addresses via WebRTC/STUN and,
+  // if BOTH families are present, geolocates each one so both can be shown.
+  // Only meaningful for the caller's own IP, never for a manually searched
+  // IP/domain, since we can't WebRTC-probe someone else's browser.
+  const detectDualStack = useCallback(async () => {
+    setDualStack(null);
+    setActiveFamily('ipv4');
+    try {
+      const { ipv4, ipv6 } = await detectDualStackIps();
+      if (!ipv4 || !ipv6) return;
+
+      const [ipv4Res, ipv6Res] = await Promise.all([
+        fetch(`/api/${encodeURIComponent(ipv4)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+        fetch(`/api/${encodeURIComponent(ipv6)}`).then((r) => (r.ok ? r.json() : null)).catch(() => null),
+      ]);
+
+      if (ipv4Res && ipv6Res) {
+        setDualStack({ ipv4: ipv4Res, ipv6: ipv6Res });
+      }
+    } catch (err) {
+      console.warn('Dual-stack IPv4/IPv6 detection failed:', err);
+    }
+  }, []);
+
   useEffect(() => {
     fetchIpData('');
-  }, [fetchIpData]);
+    detectDualStack();
+  }, [fetchIpData, detectDualStack]);
 
   const handleSearch = (ip: string) => {
+    setDualStack(null);
     fetchIpData(ip);
   };
 
   const handleResetToSelf = () => {
     fetchIpData('');
+    detectDualStack();
     showToast('Lookup reset to caller client IP');
+  };
+
+  const handleSelectFamily = (family: 'ipv4' | 'ipv6') => {
+    if (!dualStack) return;
+    setActiveFamily(family);
+    const data = dualStack[family];
+    setGeoData(data);
+    setCurrentQuery(data.query);
   };
 
   const handleCopy = (text: string, label: string) => {
@@ -207,6 +246,15 @@ export default function App() {
           <div className={`grid grid-cols-1 lg:grid-cols-12 gap-6 items-start transition-opacity duration-200 ${isLoading ? 'opacity-75 pointer-events-none' : 'opacity-100'}`}>
             {/* Left Column: Key Metadata Cards (7 cols) */}
             <div className="lg:col-span-7 space-y-6">
+              {dualStack && (
+                <DualStackBanner
+                  ipv4={dualStack.ipv4}
+                  ipv6={dualStack.ipv6}
+                  activeFamily={activeFamily}
+                  onSelect={handleSelectFamily}
+                  onCopy={handleCopy}
+                />
+              )}
               <InfoCard data={geoData} onCopy={handleCopy} isLoading={isLoading} />
             </div>
 
