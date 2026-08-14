@@ -76,6 +76,29 @@ export interface GeoResponse {
 
 ---
 
+## 🧑‍💻 Local Dev Server Lifecycle (`dev.sh`)
+
+> **IMPORTANT FOR AGENTS (Claude Code, remote or local):** This project does **not** run as an always-on background/systemd service anymore. The dev server must only run while it is actually needed (e.g. while you're making and verifying code changes) and **must be stopped again once you're done**, so it doesn't keep consuming resources/battery/ports indefinitely between sessions.
+
+Use `./dev.sh` instead of invoking `npm run dev` directly, since it manages the process lifecycle (PID tracking, logging, idempotent start/stop) for you:
+
+| Command | Effect |
+| :--- | :--- |
+| `./dev.sh start` | Starts `npm run dev` in the background (nohup), writes the PID to `.dev.pid` and output to `.dev.log`. No-ops if already running. Serves on `http://localhost:3000`. |
+| `./dev.sh status` | Prints `running (PID ...)` or `stopped`. Check this before assuming server state. |
+| `./dev.sh stop` | Kills the tracked PID and removes `.dev.pid`. **Always run this when you're done testing**, e.g. after verifying an endpoint or UI change, or at the end of your task/session. |
+| `./dev.sh restart` | `stop` followed by `start` — use after dependency changes (`npm install`) since Vite/tsx won't pick those up via HMR. |
+
+Typical agent workflow:
+1. `./dev.sh status` — check nothing is already running (avoid double-starting on a stale checkout).
+2. `./dev.sh start`, then curl/test against `http://localhost:3000` to verify your change.
+3. Inspect `.dev.log` if something doesn't behave as expected.
+4. `./dev.sh stop` before finishing the task — do not leave the process running in the background.
+
+`.dev.pid` and `.dev.log` are git-ignored artifacts of this script and should never be committed.
+
+---
+
 ## 🚀 Build & Production Pipeline
 
 - `package.json` scripts:
