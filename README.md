@@ -13,6 +13,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
    - Real-time client IP auto-detection & custom IP/domain lookup.
    - Fully supported Dark Mode with eye-friendly dimmed colors (manual toggle syncing with localStorage/OS preferences).
    - Detailed breakdown (Country, Region, City, ZIP, Coordinates, Timezone with local time, ISP, Org, AS).
+   - Dual-stack detection: if your device has both an IPv4 and an IPv6 address, both are detected client-side (via WebRTC/STUN) and shown side-by-side, each with its own geolocation — click either card to switch the active view.
    - Collapsible Developer & API Tools section (hidden by default) with Raw JSON, code snippet generator (cURL, JavaScript, Python, PHP, Go), and interactive field sandbox (`?fields=...`).
    - Custom SVG favicon and full SEO metadata (Open Graph, Twitter Cards, JSON-LD structured data).
    - Centered GitHub repository button (`https://github.com/BotVibe/neo-ip`) in the footer.
@@ -60,6 +61,15 @@ An IP geolocation web service built with Express and Vite React that mirrors the
   "query": "192.178.223.101"
 }
 ```
+
+---
+
+## 🌐 IPv4 + IPv6 Dual-Stack Detection
+
+A single HTTP request only ever reveals **one** client IP — whichever address family the browser/OS chose for that particular connection (Happy Eyeballs). To show both when a device actually has both, the frontend uses a WebRTC/STUN probe (`src/utils/detectDualStackIps.ts`): WebRTC opens a UDP socket per local network interface and queries a public STUN server independently for each, so a dual-stack client yields a server-reflexive candidate for **both** IPv4 and IPv6 in the same page load — no special DNS setup (e.g. separate `ipv4.`/`ipv6.` subdomains) required.
+
+- Runs only for the caller's own IP (on initial load and "Lookup My IP"), never for a manually searched IP/domain.
+- If both families are found, each is geolocated via `/api/:ip` and shown in a `DualStackBanner` above the main info card; if only one family is available (or WebRTC/STUN is blocked, e.g. by a restrictive firewall or an ad-blocker), the UI silently falls back to the existing single-IP view.
 
 ---
 

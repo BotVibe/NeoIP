@@ -29,8 +29,10 @@ This project is a full-stack IP Geolocation web service and API developed with E
 - **`src/components/`**:
   - `Header.tsx`: Title banner, caller IP lookup trigger, search bar, and integrated non-shifting bottom progress bar loader.
   - `InfoCard.tsx`: Formatted geolocation details with single-click copy buttons, updating indicator pill, and dimmed dark-mode badges.
+  - `DualStackBanner.tsx`: Shown above `InfoCard` only for the caller's own IP (never for a manually searched IP/domain) when both an IPv4 and an IPv6 address were detected for the client. Renders two selectable cards (one per family); clicking a card swaps it into the main `InfoCard`/map/tabs view via `activeFamily`.
   - `MapComponent.tsx`: Leaflet interactive map with custom Neo-brutalist marker and high-availability CARTO Voyager tile layer (powered by OpenStreetMap data).
   - `TabsSection.tsx`: Raw JSON viewer, multilingual code snippet generator, and interactive field tester with touch-friendly controls (toggled on-demand).
+- **`src/utils/detectDualStackIps.ts`**: Client-side WebRTC/STUN probe (`RTCPeerConnection` + public STUN servers) that gathers server-reflexive ICE candidates per address family. Because WebRTC opens a UDP socket per local interface, a dual-stack client yields both an IPv4 and an IPv6 srflx candidate in one page load — unlike a plain HTTP request, which only ever reveals whichever family the OS chose for that connection (Happy Eyeballs). Falls back to returning `{ ipv4: null, ipv6: null }` (single-address behavior, unchanged) if `RTCPeerConnection` is unavailable, STUN is blocked, or only one family is reachable.
 
 ---
 
