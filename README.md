@@ -79,6 +79,19 @@ npm run build
 npm run start
 ```
 
+### 🔌 Local dev server lifecycle (`dev.sh`)
+
+The project intentionally does **not** run permanently as a background/systemd service (running it 24/7 needlessly wastes resources, e.g. laptop battery). Instead, use the bundled helper script to start it only when needed and stop it again afterwards:
+
+```bash
+./dev.sh start    # starts `npm run dev` in the background (PID in .dev.pid, logs in .dev.log)
+./dev.sh status   # shows whether it's currently running
+./dev.sh stop     # stops it
+./dev.sh restart  # stop + start, e.g. after `npm install`
+```
+
+`.dev.pid` and `.dev.log` are local, git-ignored artifacts.
+
 ### 🚂 Railway & Railpack Deployment
 
 The repository includes `nixpacks.toml` and `railway.json` configured with `NIXPACKS_NODE_VERSION = "22"` and Node `>=20.0.0` engine enforcement. This ensures Nixpacks/Railpack builds use Node.js 22, enabling native binary compatibility for `@tailwindcss/oxide` and full support for Vite 6 build scripts.
