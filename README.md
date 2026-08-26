@@ -145,6 +145,28 @@ This tells Traefik to accept the `X-Forwarded-For` header from the outside world
 
 ---
 
+## 📄 GitHub Pages (static frontend)
+
+The repository's Pages site is published by `.github/workflows/deploy-pages.yml`
+(the Pages source must stay set to **GitHub Actions**, not "Deploy from a branch").
+Every push to `main` builds the Vite frontend and deploys `dist/` to
+`https://<owner>.github.io/<repo>/`.
+
+Two details make the build Pages-compatible:
+
+- **Base URL** — Pages serves the site from a repository sub-path, so the workflow
+  builds with `BASE_PATH=/<repo>/`. `vite.config.ts` reads that variable and
+  defaults to `/`, so the Express/Railway deployment keeps its root-relative URLs.
+- **SPA fallback** — `dist/index.html` is copied to `dist/404.html` so deep links
+  and reloads still boot the app.
+
+Pages hosts static files only: there is no Express backend and therefore no `/api`
+endpoint there. The UI handles this on its own — when the `/api` call fails, it
+falls back to the public `https://ipwho.is` lookup, so the Pages build still shows
+live geolocation data. Use the Railway/Dokploy deployment for the JSON API.
+
+---
+
 ## ⚠️ MAINTENANCE NOTE FOR AGENTS & DEVELOPERS
 
 > **IMPORTANT:** Whenever endpoints, parameters, JSON fields, UI components, or server routing are modified, you **MUST** update both `README.md` and `AGENTS.md` to keep documentation and AI agent system instructions in sync with the codebase.
