@@ -1,0 +1,60 @@
+name: Deploy static site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+# Required by actions/deploy-pages: read the repo, publish the Pages artifact and
+# mint the OIDC token the deployment is authenticated with.
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never run two Pages deployments at once, but let a queued run finish so the
+# live site always ends up matching the newest commit on main.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Build the Vite frontend
+        # GitHub Pages serves this project from https://<owner>.github.io/<repo>/,
+        # so the bundle has to be built with that sub-path as its base URL.
+        env:
+          BASE_PATH: /${{ github.event.repository.name }}/
+        run: npx vite build
+
+      - name: Add SPA fallback and disable Jekyll processing
+        run: |
+          cp dist/index.html dist/404.html
+          touch dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

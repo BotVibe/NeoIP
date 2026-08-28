@@ -5,6 +5,10 @@ import {defineConfig} from 'vite';
 
 export default defineConfig(() => {
   return {
+    // Served from the domain root by the Express server (and Railway), but from
+    // a repository sub-path on GitHub Pages (https://<user>.github.io/<repo>/).
+    // The Pages workflow sets BASE_PATH so the emitted asset URLs stay valid there.
+    base: process.env.BASE_PATH || '/',
     plugins: [react(), tailwindcss()],
     resolve: {
       alias: {
