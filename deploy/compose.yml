@@ -16,6 +16,10 @@ services:
     image: ghcr.io/botvibe/neoip:main
     container_name: neoip
     restart: unless-stopped
+    # Secrets (MAP_API_KEY) live in an untracked .env next to this file (chmod 600).
+    env_file:
+      - path: .env
+        required: false
     environment:
       NODE_ENV: production
       TRUST_PROXY: 'true'
