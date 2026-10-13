@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { GeoResponse } from './types';
 import { Header } from './components/Header';
 import { InfoCard } from './components/InfoCard';
@@ -28,6 +28,10 @@ export default function App() {
   const [showDevTools, setShowDevTools] = useState<boolean>(false);
   const [dualStack, setDualStack] = useState<{ ipv4: GeoResponse; ipv6: GeoResponse } | null>(null);
   const [activeFamily, setActiveFamily] = useState<'ipv4' | 'ipv6'>('ipv4');
+  // Once dual-stack detection has applied the preferred family (IPv4), a
+  // slower concurrent /api self-lookup must not overwrite geoData/map with the
+  // Happy-Eyeballs single address (often IPv6).
+  const dualStackOwnsDisplayRef = useRef(false);
 
   const [isDark, setIsDark] = useState<boolean>(() => {
     if (typeof window !== 'undefined') {
@@ -54,8 +58,21 @@ export default function App() {
     }, 2500);
   };
 
+  const applyGeoData = useCallback((data: GeoResponse, options?: { force?: boolean; selfLookup?: boolean }) => {
+    // Self-lookup races with dual-stack detection: once IPv4 is preferred for
+    // the main InfoCard/map, ignore a late Happy-Eyeballs /api result.
+    if (options?.selfLookup && !options.force && dualStackOwnsDisplayRef.current) {
+      return;
+    }
+    setGeoData(data);
+    if (data.query) {
+      setCurrentQuery(data.query);
+    }
+  }, []);
+
   const fetchIpData = useCallback(async (query: string = '') => {
     setIsLoading(true);
+    const selfLookup = !query;
     try {
       const endpoint = query ? `/api/${encodeURIComponent(query)}` : '/api';
       const res = await fetch(endpoint);
@@ -63,10 +80,7 @@ export default function App() {
         throw new Error(`HTTP error ${res.status}`);
       }
       const data: GeoResponse = await res.json();
-      setGeoData(data);
-      if (data.query) {
-        setCurrentQuery(data.query);
-      }
+      applyGeoData(data, { selfLookup });
     } catch (err: any) {
       console.error('Error fetching IP data from server API, attempting browser direct fallback:', err);
       try {
@@ -90,10 +104,7 @@ export default function App() {
               as: fallbackJson.connection?.asn ? `AS${fallbackJson.connection.asn} ${fallbackJson.connection.org || ''}` : '',
               query: fallbackJson.ip || query || ''
             };
-            setGeoData(formatted);
-            if (formatted.query) {
-              setCurrentQuery(formatted.query);
-            }
+            applyGeoData(formatted, { selfLookup });
             return;
           }
         }
@@ -102,7 +113,7 @@ export default function App() {
       }
 
       // Emergency static fallback if network is completely offline
-      setGeoData({
+      applyGeoData({
         status: 'success',
         country: 'Switzerland',
         countryCode: 'CH',
@@ -117,22 +128,24 @@ export default function App() {
         org: 'Swisscom (Schweiz) AG',
         as: 'AS3303 Swisscom (Switzerland) Ltd',
         query: query || '170.205.81.42',
-      });
+      }, { selfLookup });
       if (query) {
         setCurrentQuery(query);
       }
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [applyGeoData]);
 
   // Detects the client's own public IPv4/IPv6 addresses via WebRTC/STUN and,
   // if BOTH families are present, geolocates each one so both can be shown.
   // Only meaningful for the caller's own IP, never for a manually searched
   // IP/domain, since we can't WebRTC-probe someone else's browser.
+  // IPv4 is the default active family and drives InfoCard + map on load.
   const detectDualStack = useCallback(async () => {
     setDualStack(null);
     setActiveFamily('ipv4');
+    dualStackOwnsDisplayRef.current = false;
     try {
       const { ipv4, ipv6 } = await detectDualStackIps();
       if (!ipv4 || !ipv6) return;
@@ -144,11 +157,15 @@ export default function App() {
 
       if (ipv4Res && ipv6Res) {
         setDualStack({ ipv4: ipv4Res, ipv6: ipv6Res });
+        setActiveFamily('ipv4');
+        // Prefer IPv4 for the main view (map + InfoCard), not the Happy-Eyeballs IP.
+        dualStackOwnsDisplayRef.current = true;
+        applyGeoData(ipv4Res, { force: true });
       }
     } catch (err) {
       console.warn('Dual-stack IPv4/IPv6 detection failed:', err);
     }
-  }, []);
+  }, [applyGeoData]);
 
   useEffect(() => {
     fetchIpData('');
@@ -156,11 +173,13 @@ export default function App() {
   }, [fetchIpData, detectDualStack]);
 
   const handleSearch = (ip: string) => {
+    dualStackOwnsDisplayRef.current = false;
     setDualStack(null);
     fetchIpData(ip);
   };
 
   const handleResetToSelf = () => {
+    dualStackOwnsDisplayRef.current = false;
     fetchIpData('');
     detectDualStack();
     showToast('Lookup reset to caller client IP');
@@ -170,8 +189,7 @@ export default function App() {
     if (!dualStack) return;
     setActiveFamily(family);
     const data = dualStack[family];
-    setGeoData(data);
-    setCurrentQuery(data.query);
+    applyGeoData(data, { force: true });
   };
 
   const handleCopy = (text: string, label: string) => {
