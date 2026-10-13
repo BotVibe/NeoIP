@@ -3,6 +3,8 @@ import { Search, Globe, RotateCcw, Zap, ExternalLink } from 'lucide-react';
 
 interface HeaderProps {
   currentIp: string;
+  /** Prefer `/api/:ip` when the active (usually IPv4) address is known. */
+  apiHref?: string;
   onSearch: (ip: string) => void;
   onResetToSelf: () => void;
   isLoading: boolean;
@@ -10,6 +12,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({
   currentIp,
+  apiHref = '/api',
   onSearch,
   onResetToSelf,
   isLoading,
@@ -50,10 +53,11 @@ export const Header: React.FC<HeaderProps> = ({
           {/* Quick API Link & Self IP Badge */}
           <div className="flex flex-wrap items-center gap-2 sm:gap-3 shrink-0">
             <a
-              href="/api"
+              href={apiHref}
               target="_blank"
               rel="noreferrer"
               className="neo-btn bg-[#06B6D4] dark:bg-[#0491A9] text-black dark:text-white font-black px-3 py-2 text-xs min-h-[44px] flex items-center gap-1.5 uppercase hover:bg-[#38BDF8] dark:hover:bg-[#037A8E]"
+              title={currentIp ? `Open /api/${currentIp}` : 'Open /api'}
             >
               <ExternalLink className="w-4 h-4 shrink-0" />
               Open /api Direct

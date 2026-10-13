@@ -51,10 +51,13 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
     URL.revokeObjectURL(url);
   };
 
-  // Generate code snippets
+  // Generate code snippets — pin /api/:ip when known so `query` is the preferred
+  // address (IPv4 after dual-stack), not a bare Happy-Eyeballs /api self-lookup.
   const getCodeSnippet = () => {
     const origin = window.location.origin;
-    const targetUrl = `${origin}/api${currentIp ? `?ip=${currentIp}` : ''}`;
+    const targetUrl = currentIp
+      ? `${origin}/api/${encodeURIComponent(currentIp)}`
+      : `${origin}/api`;
 
     switch (activeLang) {
       case 'curl':

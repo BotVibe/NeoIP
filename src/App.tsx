@@ -197,6 +197,15 @@ export default function App() {
     showToast(`Copied ${label} to clipboard!`);
   };
 
+  // Prefer /api/:ip with the active address (IPv4 after dual-stack detection).
+  // Bare /api only ever sees one Happy-Eyeballs connection IP server-side.
+  const preferredApiHref = currentQuery
+    ? `/api/${encodeURIComponent(currentQuery)}`
+    : '/api';
+  const preferredJsonHref = currentQuery
+    ? `/json/${encodeURIComponent(currentQuery)}`
+    : '/json';
+
   return (
     <div className="min-h-screen bg-[#FFFDF5] dark:bg-[#121212] text-black dark:text-gray-100 font-sans pb-16 flex flex-col transition-colors duration-200">
       {/* Top Notification Bar */}
@@ -214,7 +223,7 @@ export default function App() {
 
         <div className="flex items-center gap-4 ml-4">
           <a
-            href="/api"
+            href={preferredApiHref}
             target="_blank"
             rel="noreferrer"
             className="text-[#FFE600] dark:text-[#CCB800] hover:underline flex items-center gap-1 whitespace-nowrap"
@@ -236,6 +245,7 @@ export default function App() {
       {/* Main Header */}
       <Header
         currentIp={currentQuery}
+        apiHref={preferredApiHref}
         onSearch={handleSearch}
         onResetToSelf={handleResetToSelf}
         isLoading={isLoading}
@@ -358,17 +368,17 @@ export default function App() {
             </a>
           </div>
 
-          {/* Right API Endpoint Links */}
+          {/* Right API Endpoint Links — use preferred (IPv4) IP when known */}
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <a href="/api" className="hover:underline flex items-center gap-1 font-black">
+            <a href={preferredApiHref} className="hover:underline flex items-center gap-1 font-black">
               <Terminal className="w-3.5 h-3.5 text-[#FF007A] dark:text-[#CC0062]" />
               GET /api
             </a>
-            <a href="/json" className="hover:underline flex items-center gap-1 font-black">
+            <a href={preferredJsonHref} className="hover:underline flex items-center gap-1 font-black">
               GET /json
             </a>
             <a
-              href={`/api/${geoData?.query || '170.205.81.42'}`}
+              href={preferredApiHref === '/api' ? '/api/170.205.81.42' : preferredApiHref}
               className="hover:underline flex items-center gap-1 font-black"
             >
               GET /api/:ip
