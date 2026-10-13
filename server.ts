@@ -326,6 +326,59 @@ async function handleApiRequest(req: Request, res: Response) {
   return res.json(geoData);
 }
 
+// ---------------------------------------------------------------- map tiles
+// CARTO raster basemaps require an API key (since Sept 2026). The key must never
+// reach the browser, so the frontend requests tiles from this proxy, which adds
+// the key server-side from MAP_API_KEY. Only the Voyager raster tile path is
+// proxied; everything else 404s.
+const MAP_API_KEY = (process.env.MAP_API_KEY || '').trim();
+const TILE_SUBDOMAINS = ['a', 'b', 'c', 'd'];
+const TILE_PATH = /^\/api\/map\/tiles\/(\d{1,2})\/(\d{1,7})\/(\d{1,7})(@2x)?\.png$/;
+
+const tileLimiter = rateLimit({
+  windowMs: 60 * 1000,
+  max: 1200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  validate: { trustProxy: false },
+  keyGenerator: (req) => ipKeyGenerator(getClientIp(req) || req.ip || '127.0.0.1'),
+  message: { status: 'fail', message: 'Too many tile requests.' }
+});
+
+app.get(TILE_PATH, tileLimiter, async (req, res) => {
+  const m = TILE_PATH.exec(req.path);
+  if (!m) return res.sendStatus(404);
+  const [, zs, xs, ys, retina] = m;
+  const z = Number(zs), x = Number(xs), y = Number(ys);
+  const max = 2 ** z;
+  if (z > 20 || x >= max || y >= max) return res.sendStatus(404);
+
+  const sub = TILE_SUBDOMAINS[(x + y) % TILE_SUBDOMAINS.length];
+  const upstream = new URL(
+    `https://${sub}.basemaps.cartocdn.com/rastertiles/voyager/${z}/${x}/${y}${retina || ''}.png`
+  );
+  if (MAP_API_KEY) upstream.searchParams.set('key', MAP_API_KEY);
+
+  try {
+    const r = await fetch(upstream, {
+      headers: { 'User-Agent': 'NeoIP tile proxy (+https://neoip.rosentreter.site)' },
+      signal: AbortSignal.timeout(10000),
+    });
+    if (!r.ok) {
+      // Never echo upstream bodies/URLs: they could contain the key.
+      console.warn(`map tile upstream ${r.status} for z=${z}`);
+      return res.sendStatus(r.status === 404 ? 404 : 502);
+    }
+    const buf = Buffer.from(await r.arrayBuffer());
+    res.setHeader('Content-Type', r.headers.get('content-type') || 'image/png');
+    res.setHeader('Cache-Control', 'public, max-age=86400, stale-while-revalidate=604800');
+    return res.send(buf);
+  } catch {
+    console.warn('map tile upstream fetch failed');
+    return res.sendStatus(502);
+  }
+});
+
 // Routes
 app.get('/api/client-info', apiLimiter, (req, res) => {
   res.json({
