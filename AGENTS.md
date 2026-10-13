@@ -110,11 +110,7 @@ Typical agent workflow:
   - `start`: `node dist/server.cjs`
 - Deployment Configuration (`nixpacks.toml` & `railway.json`):
   - Configured with `NIXPACKS_NODE_VERSION = "22"` and Node `>=20.0.0` engine specification to enforce Node.js 22 runtime during Nixpacks/Railpack container builds, ensuring full compatibility with `@tailwindcss/oxide` native binary bindings and Vite 6.
-- GitHub Pages (`.github/workflows/deploy-pages.yml`):
-  - Publishes the **static frontend only** to `https://<owner>.github.io/<repo>/` on every push to `main`; the repository's Pages source must remain set to **GitHub Actions**.
-  - Builds with `BASE_PATH=/<repo>/` so Vite emits sub-path asset URLs. `vite.config.ts` exposes this via `base: process.env.BASE_PATH || '/'` — never hardcode a base, or the Express/Railway deployment (served from `/`) breaks.
-  - Copies `dist/index.html` to `dist/404.html` for SPA deep-link fallback and writes `.nojekyll`.
-  - No Express backend runs there, so `/api` is unavailable; the UI's existing `https://ipwho.is` client fallback in `src/App.tsx` covers this and must be kept intact.
+- Production: https://neoip.rosentreter.site (GHCR image via `deploy/compose.yml` behind Caddy). GitHub Pages is shut down; do not re-add a Pages workflow. `vite.config.ts` keeps `base: process.env.BASE_PATH || '/'` (default `/`).
 - CI (`.github/workflows/ci.yml`):
   - On pull requests and pushes to `main`, runs `npm ci`, `npm run lint`, and `npm run build` on Node 22.
 - Docker publish (`.github/workflows/docker-publish.yml`):
