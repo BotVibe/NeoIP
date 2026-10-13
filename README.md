@@ -20,7 +20,7 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 
 2. **API Endpoint (`/api`, `/json`, `/api/:query`, `/json/:query`)**:
    - Production-hardened with `helmet` for security headers, gzip compression, and API rate limiting (300 requests / 15 min per IP).
-   - Configured with `app.set('trust proxy', true)` and multi-header extraction (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` prioritized before `x-real-ip`, etc.) to accurately detect caller IPs behind multi-layer reverse proxies (Dokploy, Traefik, Nginx, Cloudflare).
+   - Client IP via `TRUST_PROXY`: unset keeps the legacy multi-header path (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` before `x-real-ip`, etc. for Dokploy/Cloudflare); `true` (Docker default) trusts **X-Forwarded-For only**; `false` uses the socket address.
    - Returns strict raw JSON adhering to the `ip-api.com/json` schema.
    - Supports cross-origin requests (CORS enabled).
    - Supports field filtering via `?fields=status,country,city,lat,lon,query`.
@@ -105,6 +105,43 @@ The project intentionally does **not** run permanently as a background/systemd s
 ### 🚂 Railway & Railpack Deployment
 
 The repository includes `nixpacks.toml` and `railway.json` configured with `NIXPACKS_NODE_VERSION = "22"` and Node `>=20.0.0` engine enforcement. This ensures Nixpacks/Railpack builds use Node.js 22, enabling native binary compatibility for `@tailwindcss/oxide` and full support for Vite 6 build scripts.
+
+### Deploy (Docker + Caddy)
+
+Production images are built on every push to `main` by `.github/workflows/docker-publish.yml` and published to:
+
+- `ghcr.io/botvibe/neoip:main`
+- `ghcr.io/botvibe/neoip:sha-<shortsha>`
+
+Each image carries the OCI label `org.opencontainers.image.revision` (full git SHA).
+
+The app is meant to sit on an external Docker network named `web`, with **Caddy** (or another reverse proxy) terminating TLS and setting `X-Forwarded-For`. Compose publishes **no host ports** — only the proxy should be reachable from the internet.
+
+```bash
+# once on the host
+docker network create web
+docker login ghcr.io   # if the GHCR package is private
+
+cd deploy
+docker compose pull
+docker compose up -d
+```
+
+`deploy/compose.yml` runs container `neoip` from `ghcr.io/botvibe/neoip:main` with `TRUST_PROXY=true`. Point Caddy at `neoip:3000`, for example:
+
+```caddyfile
+geo.example.com {
+	reverse_proxy neoip:3000
+}
+```
+
+With `TRUST_PROXY=true`, NeoIP reads the caller IP from **X-Forwarded-For only** (Caddy sets this by default) and ignores spoofable headers such as `Cf-Connecting-Ip`. Leave `TRUST_PROXY` unset for the legacy multi-header behaviour (Dokploy / Cloudflare). Set `TRUST_PROXY=false` to ignore forwarded headers entirely.
+
+Local image build (optional):
+
+```bash
+docker build -t neoip:local --build-arg APP_REVISION="$(git rev-parse HEAD)" .
+```
 
 ### 🐳 Dokploy Deployment (Fixing Client IP)
 
