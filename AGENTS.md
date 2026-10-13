@@ -115,6 +115,9 @@ Typical agent workflow:
   - Builds with `BASE_PATH=/<repo>/` so Vite emits sub-path asset URLs. `vite.config.ts` exposes this via `base: process.env.BASE_PATH || '/'` — never hardcode a base, or the Express/Railway deployment (served from `/`) breaks.
   - Copies `dist/index.html` to `dist/404.html` for SPA deep-link fallback and writes `.nojekyll`.
   - No Express backend runs there, so `/api` is unavailable; the UI's existing `https://ipwho.is` client fallback in `src/App.tsx` covers this and must be kept intact.
+- CI (`.github/workflows/ci.yml`):
+  - On pull requests and pushes to `main`, runs `npm ci`, `npm run lint`, and `npm run build` on Node 22.
 - Docker publish (`.github/workflows/docker-publish.yml`):
-  - On push to `main` (and `workflow_dispatch`), builds the root `Dockerfile` and pushes to GHCR as `ghcr.io/botvibe/neoip:main` plus `sha-<shortsha>`, labeling `org.opencontainers.image.revision` with the full commit SHA.
+  - On pull requests, builds the root `Dockerfile` (no registry push) so the image stays green before merge.
+  - On push to `main` (and `workflow_dispatch`), builds and pushes to GHCR as `ghcr.io/botvibe/neoip:main` plus `sha-<shortsha>`, labeling `org.opencontainers.image.revision` with the full commit SHA.
   - VPS deploy: `deploy/compose.yml` pulls that image onto external network `web` (container name `neoip`, no published ports); Caddy terminates TLS and sets `X-Forwarded-For`.
