@@ -6,10 +6,29 @@ import compression from 'compression';
 import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
-// Trust proxies to get correct client IP behind multi-layer load balancers (Dokploy, Traefik, Nginx, Cloudflare, Cloud Run)
-app.set('trust proxy', true);
+/**
+ * TRUST_PROXY controls how the caller's IP is resolved:
+ * - unset / empty: legacy multi-header extraction (Dokploy, Cloudflare, etc.)
+ * - true / 1 / yes / on: trust proxy; read client IP from X-Forwarded-For only
+ *   (Docker + Caddy path — do not trust spoofable Cf-Connecting-Ip etc.)
+ * - false / 0 / no / off: do not trust forwarded headers; use the socket address
+ *
+ * The production container sets TRUST_PROXY=true by default.
+ */
+type TrustProxyMode = 'legacy' | true | false;
+
+function parseTrustProxyMode(raw: string | undefined): TrustProxyMode {
+  if (raw === undefined || raw.trim() === '') return 'legacy';
+  const v = raw.trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(v)) return true;
+  if (['0', 'false', 'no', 'off'].includes(v)) return false;
+  return 'legacy';
+}
+
+const trustProxyMode = parseTrustProxyMode(process.env.TRUST_PROXY);
+app.set('trust proxy', trustProxyMode !== false);
 
 // Apply security headers
 app.use(helmet({
@@ -123,7 +142,62 @@ function extractIpCandidates(headerValue: string | string[] | undefined): string
     .filter((s) => s.length > 0);
 }
 
+function firstPublicFromHeaders(req: Request, headerKeys: string[]): string {
+  for (const key of headerKeys) {
+    const candidates = extractIpCandidates(req.headers[key]);
+    for (const candidate of candidates) {
+      if (candidate && !isPrivateIp(candidate)) {
+        return candidate;
+      }
+    }
+  }
+  return '';
+}
+
+function firstPublicFromExpressIp(req: Request): string {
+  // Express req.ips is populated from X-Forwarded-For when trust proxy is on
+  if (req.ips && Array.isArray(req.ips)) {
+    for (const ip of req.ips) {
+      const clean = cleanIpString(ip);
+      if (clean && !isPrivateIp(clean)) {
+        return clean;
+      }
+    }
+  }
+  if (req.ip) {
+    const clean = cleanIpString(req.ip);
+    if (clean && !isPrivateIp(clean)) {
+      return clean;
+    }
+  }
+  return '';
+}
+
+function socketClientIp(req: Request): string {
+  const remoteAddr = req.socket?.remoteAddress || '';
+  const cleanRemote = cleanIpString(remoteAddr);
+  if (cleanRemote && !isPrivateIp(cleanRemote)) {
+    return cleanRemote;
+  }
+  return '';
+}
+
 function getClientIp(req: Request): string {
+  // Docker + Caddy (TRUST_PROXY=true): X-Forwarded-For only — never Cf-Connecting-Ip etc.
+  if (trustProxyMode === true) {
+    const fromXff = firstPublicFromHeaders(req, ['x-forwarded-for']);
+    if (fromXff) return fromXff;
+    const fromExpress = firstPublicFromExpressIp(req);
+    if (fromExpress) return fromExpress;
+    return socketClientIp(req);
+  }
+
+  // TRUST_PROXY=false: ignore forwarded headers entirely
+  if (trustProxyMode === false) {
+    return socketClientIp(req);
+  }
+
+  // Legacy (TRUST_PROXY unset): multi-header extraction for Dokploy / Cloudflare / etc.
   // CRITICAL HEADER ORDER:
   // 1. cf-connecting-ip (Cloudflare edge client IP)
   // 2. true-client-ip (Akamai/Cloudflare client IP)
@@ -134,7 +208,7 @@ function getClientIp(req: Request): string {
   // 6. x-client-ip
   // 7. fastly-client-ip
   // 8. x-cluster-client-ip
-  const headerKeys = [
+  const fromHeaders = firstPublicFromHeaders(req, [
     'cf-connecting-ip',
     'true-client-ip',
     'x-forwarded-for',
@@ -143,44 +217,13 @@ function getClientIp(req: Request): string {
     'x-client-ip',
     'fastly-client-ip',
     'x-cluster-client-ip'
-  ];
+  ]);
+  if (fromHeaders) return fromHeaders;
 
-  for (const key of headerKeys) {
-    const headerVal = req.headers[key];
-    const candidates = extractIpCandidates(headerVal);
-    for (const candidate of candidates) {
-      if (candidate && !isPrivateIp(candidate)) {
-        return candidate;
-      }
-    }
-  }
+  const fromExpress = firstPublicFromExpressIp(req);
+  if (fromExpress) return fromExpress;
 
-  // Fallback to Express req.ips array (populated when trust proxy is enabled from X-Forwarded-For left to right)
-  if (req.ips && Array.isArray(req.ips)) {
-    for (const ip of req.ips) {
-      const clean = cleanIpString(ip);
-      if (clean && !isPrivateIp(clean)) {
-        return clean;
-      }
-    }
-  }
-
-  // Fallback to Express req.ip
-  if (req.ip) {
-    const clean = cleanIpString(req.ip);
-    if (clean && !isPrivateIp(clean)) {
-      return clean;
-    }
-  }
-
-  // Fallback to socket remoteAddress
-  const remoteAddr = req.socket?.remoteAddress || '';
-  const cleanRemote = cleanIpString(remoteAddr);
-  if (cleanRemote && !isPrivateIp(cleanRemote)) {
-    return cleanRemote;
-  }
-
-  return '';
+  return socketClientIp(req);
 }
 
 async function fetchGeoData(queryIp: string): Promise<GeoResponse> {

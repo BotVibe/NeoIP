@@ -1,0 +1,27 @@
+# NeoIP behind an existing Caddy (or other) reverse proxy on the shared `web`
+# network. No host ports are published — TLS and routing live on the proxy.
+#
+# Prerequisites:
+#   docker network create web   # once, if it does not exist
+#   docker login ghcr.io        # if the package is private
+#
+# Usage:
+#   cd deploy && docker compose pull && docker compose up -d
+#
+# Point Caddy at container `neoip:3000` and forward the real client IP via
+# X-Forwarded-For (Caddy does this by default on reverse_proxy).
+
+services:
+  neoip:
+    image: ghcr.io/botvibe/neoip:main
+    container_name: neoip
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      TRUST_PROXY: 'true'
+    networks:
+      - web
+
+networks:
+  web:
+    external: true

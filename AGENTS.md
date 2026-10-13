@@ -18,12 +18,13 @@ This project is a full-stack IP Geolocation web service and API developed with E
 
 ## 🏗️ Architecture Overview
 
-- **`server.ts`**: Express backend server running on port `3000` (host `0.0.0.0`).
+- **`server.ts`**: Express backend server running on port `3000` (host `0.0.0.0`, overridable via `PORT`).
   - Implements production-grade security and optimization (`helmet` for headers, `compression` for gzipping, `express-rate-limit` for DDoS prevention).
-  - Configured with `app.set('trust proxy', true)` and multi-header client IP extraction (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` prioritized before `x-real-ip`, RFC 7239 `forwarded`, etc.) to accurately detect the client's public IP behind multi-layer reverse proxies like Dokploy, Traefik, Nginx, and Cloudflare.
+  - Client IP via `TRUST_PROXY`: unset → legacy multi-header extraction (`cf-connecting-ip`, `true-client-ip`, `x-forwarded-for` before `x-real-ip`, RFC 7239 `forwarded`, etc. for Dokploy/Traefik/Cloudflare); `true` (Docker image default) → trust proxy and read **X-Forwarded-For only** (Caddy path; does not trust `Cf-Connecting-Ip` etc.); `false` → socket `remoteAddress` only.
   - Handles `/api`, `/json`, `/api/json`, `/api/:query`, `/json/:query`, `/api/json/:query` endpoints, plus a `/api/client-info` debug endpoint that returns the resolved caller IP and raw request headers.
   - Proxies geolocation requests to `ip-api.com` with a fallback mechanism to `ipwho.is` and in-memory TTL caching.
   - Serves Vite middleware in development (`NODE_ENV !== 'production'`) and static files from `dist/` in production.
+- **Docker / GHCR**: `Dockerfile` (Node 22 alpine, multi-stage, non-root `app` user, `NODE_ENV=production`, `TRUST_PROXY=true`, port 3000, `HEALTHCHECK`). `.github/workflows/docker-publish.yml` pushes `ghcr.io/botvibe/neoip:main` and `sha-<short>` on push to `main`, with OCI `org.opencontainers.image.revision`. `deploy/compose.yml` runs that image as container `neoip` on external network `web` with no published ports (Caddy in front).
 - **`index.html`**: Entry html file with custom Neo-brutalist SVG favicon (`/public/favicon.svg`), Open Graph, Twitter Cards, theme color, and JSON-LD WebApplication structured data.
 - **`src/App.tsx`**: Single-page application rendering the Neo-brutalist dashboard with zero-layout-shift loading state (fixed skeleton loader & non-intrusive header progress bar), dimmed dark mode palette, a centered GitHub repository link (`https://github.com/BotVibe/neo-ip`) in the footer, and a collapsible Developer Tools section (hidden by default).
 - **`src/components/`**:
@@ -114,3 +115,6 @@ Typical agent workflow:
   - Builds with `BASE_PATH=/<repo>/` so Vite emits sub-path asset URLs. `vite.config.ts` exposes this via `base: process.env.BASE_PATH || '/'` — never hardcode a base, or the Express/Railway deployment (served from `/`) breaks.
   - Copies `dist/index.html` to `dist/404.html` for SPA deep-link fallback and writes `.nojekyll`.
   - No Express backend runs there, so `/api` is unavailable; the UI's existing `https://ipwho.is` client fallback in `src/App.tsx` covers this and must be kept intact.
+- Docker publish (`.github/workflows/docker-publish.yml`):
+  - On push to `main` (and `workflow_dispatch`), builds the root `Dockerfile` and pushes to GHCR as `ghcr.io/botvibe/neoip:main` plus `sha-<shortsha>`, labeling `org.opencontainers.image.revision` with the full commit SHA.
+  - VPS deploy: `deploy/compose.yml` pulls that image onto external network `web` (container name `neoip`, no published ports); Caddy terminates TLS and sets `X-Forwarded-For`.
