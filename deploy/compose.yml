@@ -1,6 +1,14 @@
 # NeoIP behind an existing Caddy (or other) reverse proxy on the shared `web`
 # network. No host ports are published — TLS and routing live on the proxy.
 #
+# Production hosts (same container, no redirects; DNS pins family):
+#   neoip.rosentreter.site      — A + AAAA (connection family)
+#   ipv4.neoip.rosentreter.site  — A 45.137.68.45 only
+#   ipv6.neoip.rosentreter.site  — AAAA 2a06:de00:401:909b::1 only
+#
+# Prod Caddy is NOT deployed from this repo. On the server it lives in the
+# shared proxy stack: /opt/proxy/sites/neoip.caddy (container proxy-caddy-1).
+#
 # Prerequisites:
 #   docker network create web   # once, if it does not exist
 #   docker login ghcr.io        # if the package is private
