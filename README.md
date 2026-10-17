@@ -39,6 +39,25 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 | `/api/json/:query` | `GET` | Alias endpoint for target IP or domain | `/api/json/google.com` |
 | `/api/client-info` | `GET` | Debug endpoint: returns the resolved caller IP and raw request headers (useful for diagnosing reverse-proxy header issues) | `/api/client-info` |
 
+### Production API hosts (dual-stack / IPv4-only / IPv6-only)
+
+Three public hostnames serve the same NeoIP container. There are **no automatic redirects** between them — DNS alone selects the address family:
+
+| Host | DNS | Behavior |
+| :--- | :--- | :--- |
+| `https://neoip.rosentreter.site/api/` | A + AAAA | Returns the IP the TCP connection actually used (Happy Eyeballs) |
+| `https://ipv4.neoip.rosentreter.site/api/` | A `45.137.68.45` only (no AAAA) | IPv4-only self-lookup |
+| `https://ipv6.neoip.rosentreter.site/api/` | AAAA `2a06:de00:401:909b::1` only (no A) | IPv6-only self-lookup |
+
+```bash
+curl https://neoip.rosentreter.site/api/
+curl https://ipv4.neoip.rosentreter.site/api/
+curl https://ipv6.neoip.rosentreter.site/api/
+curl https://neoip.rosentreter.site/api/8.8.8.8
+```
+
+CORS is enabled (`Access-Control-Allow-Origin: *`, methods `GET, OPTIONS`, headers `Content-Type, Authorization`) so browsers can call the family-specific hosts cross-origin from the main site.
+
 ---
 
 ## 📋 Response Format (`http://ip-api.com/json` Compatible)
@@ -66,12 +85,16 @@ An IP geolocation web service built with Express and Vite React that mirrors the
 
 ## 🌐 IPv4 + IPv6 Dual-Stack Detection
 
-A single HTTP request only ever reveals **one** client IP — whichever address family the browser/OS chose for that particular connection (Happy Eyeballs). To show both when a device actually has both, the frontend uses a WebRTC/STUN probe (`src/utils/detectDualStackIps.ts`): WebRTC opens a UDP socket per local network interface and queries a public STUN server independently for each, so a dual-stack client yields a server-reflexive candidate for **both** IPv4 and IPv6 in the same page load — no special DNS setup (e.g. separate `ipv4.`/`ipv6.` subdomains) required.
+A single HTTP request only ever reveals **one** client IP — whichever address family the browser/OS chose for that particular connection (Happy Eyeballs). Two complementary approaches:
 
-- Runs only for the caller's own IP (on initial load and "Lookup My IP"), never for a manually searched IP/domain.
+1. **Family-specific API hosts** (curl / scripts / cross-origin fetch): `ipv4.neoip.rosentreter.site` (A-only) and `ipv6.neoip.rosentreter.site` (AAAA-only) force the connection onto one family. The dual-stack apex `neoip.rosentreter.site` returns whichever family the client actually used. See [Production API hosts](#production-api-hosts-dual-stack--ipv4-only--ipv6-only).
+2. **In-browser dual-stack UI**: the frontend also uses a WebRTC/STUN probe (`src/utils/detectDualStackIps.ts`). WebRTC opens a UDP socket per local interface and queries a public STUN server independently for each, so a dual-stack client yields a server-reflexive candidate for **both** IPv4 and IPv6 in the same page load.
+
+- Dual-stack UI runs only for the caller's own IP (on initial load and "Lookup My IP"), never for a manually searched IP/domain.
 - If both families are found, each is geolocated via `/api/:ip` and shown in a `DualStackBanner` above the main info card. **IPv4 is preferred on load**: it is marked Active and drives the InfoCard, map marker, tabs, and in-app `/api` / `/json` links (they open `/api/<ipv4>` so the JSON `query` field is the IPv4). Click either card to switch. If only one family is available (or WebRTC/STUN is blocked, e.g. by a restrictive firewall or an ad-blocker), the UI silently falls back to the existing single-IP view.
+- The Developer Tools → API Docs tab also probes `ipv4.` / `ipv6.` hosts in parallel (~3 s timeout) and shows **Your IPv4** / **Your IPv6**, or **not available** when a family cannot be reached.
 
-> **Note on bare `GET /api`:** A single HTTP request can only reveal **one** client address (Happy Eyeballs). The server cannot know that a dual-stack client also has an IPv4. Opening `https://…/api/` directly (curl, address bar) therefore returns whatever family that TCP connection used. Prefer `GET /api/<ipv4>` (or the in-app “Open /api Direct” link after dual-stack detection) when you want IPv4 in `query`.
+> **Note on bare `GET /api` on the dual-stack host:** A single HTTP request can only reveal **one** client address (Happy Eyeballs). Prefer `https://ipv4.neoip.rosentreter.site/api/` / `https://ipv6.neoip.rosentreter.site/api/`, or `GET /api/<ipv4>` (or the in-app “Open /api Direct” link after dual-stack detection), when you need a specific family in `query`.
 
 ---
 
@@ -129,7 +152,34 @@ docker compose pull
 docker compose up -d
 ```
 
-`deploy/compose.yml` runs container `neoip` from `ghcr.io/botvibe/neoip:main` with `TRUST_PROXY=true`. Point Caddy at `neoip:3000`, for example:
+`deploy/compose.yml` runs container `neoip` from `ghcr.io/botvibe/neoip:main` with `TRUST_PROXY=true`.
+
+**Production Caddy is not deployed from this repo.** On the prod server it lives in the shared proxy stack (`/opt/proxy`, container `proxy-caddy-1`) as `/opt/proxy/sites/neoip.caddy`. That site file currently looks like:
+
+```caddyfile
+(neoip_proxy) {
+	encode zstd gzip
+	reverse_proxy neoip:3000 {
+		header_up -Cf-Connecting-Ip
+		header_up -True-Client-Ip
+		header_up -X-Real-Ip
+		header_up -Forwarded
+	}
+}
+neoip.rosentreter.site {
+	import neoip_proxy
+}
+ipv4.neoip.rosentreter.site {
+	header X-Robots-Tag "noindex"
+	import neoip_proxy
+}
+ipv6.neoip.rosentreter.site {
+	header X-Robots-Tag "noindex"
+	import neoip_proxy
+}
+```
+
+All three hostnames reverse-proxy the same `neoip:3000` container with no redirects. Spoofable client-IP headers are stripped so only Caddy’s `X-Forwarded-For` reaches the app. For a minimal local/example Caddy:
 
 ```caddyfile
 geo.example.com {
@@ -186,7 +236,7 @@ This tells Traefik to accept the `X-Forwarded-For` header from the outside world
 
 ## 🌐 Production
 
-Production runs at **https://neoip.rosentreter.site** (Docker image `ghcr.io/botvibe/neoip:main` behind Caddy, see `deploy/compose.yml`). GitHub Pages is shut down and no longer used.
+Production runs at **https://neoip.rosentreter.site** (Docker image `ghcr.io/botvibe/neoip:main` behind Caddy, see `deploy/compose.yml`), with family-specific hosts **https://ipv4.neoip.rosentreter.site** and **https://ipv6.neoip.rosentreter.site** (see [Production API hosts](#production-api-hosts-dual-stack--ipv4-only--ipv6-only)). Caddy config is on the server at `/opt/proxy/sites/neoip.caddy` and is not shipped from this repository. GitHub Pages is shut down and no longer used.
 
 ---
 

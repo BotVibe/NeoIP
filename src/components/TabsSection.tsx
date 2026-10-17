@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Code2,
   Terminal,
@@ -10,8 +10,34 @@ import {
   Play,
   Layers,
   Sparkles,
+  Globe2,
 } from 'lucide-react';
 import { GeoResponse } from '../types';
+
+/** Production dual-stack API hosts (DNS A-only / AAAA-only for family pinning). */
+const API_HOSTS = {
+  dual: 'https://neoip.rosentreter.site',
+  ipv4: 'https://ipv4.neoip.rosentreter.site',
+  ipv6: 'https://ipv6.neoip.rosentreter.site',
+} as const;
+
+const FAMILY_PROBE_TIMEOUT_MS = 3000;
+
+async function fetchQueryWithTimeout(url: string, ms: number): Promise<string | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), ms);
+  try {
+    const res = await fetch(url, { signal: controller.signal });
+    if (!res.ok) return null;
+    const json = (await res.json()) as { query?: string; status?: string };
+    if (json.status === 'fail' || !json.query) return null;
+    return json.query;
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
 
 interface TabsSectionProps {
   data: GeoResponse;
@@ -32,6 +58,30 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
   const [testFieldQuery, setTestFieldQuery] = useState('');
   const [playgroundResult, setPlaygroundResult] = useState<string | null>(null);
   const [isTesting, setIsTesting] = useState(false);
+
+  // Optional live probe of family-specific hosts (docs tab only).
+  const [familyIps, setFamilyIps] = useState<{
+    ipv4: string | null;
+    ipv6: string | null;
+    loading: boolean;
+  }>({ ipv4: null, ipv6: null, loading: true });
+
+  useEffect(() => {
+    if (activeTab !== 'docs') return;
+    let cancelled = false;
+    setFamilyIps((prev) => ({ ...prev, loading: true }));
+
+    Promise.all([
+      fetchQueryWithTimeout(`${API_HOSTS.ipv4}/api/`, FAMILY_PROBE_TIMEOUT_MS),
+      fetchQueryWithTimeout(`${API_HOSTS.ipv6}/api/`, FAMILY_PROBE_TIMEOUT_MS),
+    ]).then(([ipv4, ipv6]) => {
+      if (!cancelled) setFamilyIps({ ipv4, ipv6, loading: false });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [activeTab]);
 
   const jsonString = JSON.stringify(data, null, 2);
 
@@ -226,6 +276,98 @@ export const TabsSection: React.FC<TabsSectionProps> = ({
       {/* Tab 3: API Docs & Interactive Playground */}
       {activeTab === 'docs' && (
         <div className="p-3.5 sm:p-4 space-y-5">
+          {/* Production API hosts (dual-stack / IPv4-only / IPv6-only) */}
+          <div className="space-y-3">
+            <h3 className="text-sm font-black uppercase text-black dark:text-white flex items-center gap-2">
+              <Globe2 className="w-4 h-4 text-[#06B6D4] dark:text-[#0491A9]" />
+              PRODUCTION API HOSTS
+            </h3>
+            <p className="text-xs text-gray-700 dark:text-gray-300 font-medium">
+              Three hostnames, same app, no redirects. Dual-stack returns whichever family your connection used; the family-specific hosts pin DNS to A-only or AAAA-only.
+            </p>
+
+            <div className="overflow-x-auto border-3 border-black">
+              <table className="w-full text-left font-mono text-xs border-collapse min-w-[560px]">
+                <thead className="bg-[#06B6D4] dark:bg-[#0491A9] text-black dark:text-white border-b-2 border-black font-sans font-black uppercase">
+                  <tr>
+                    <th className="p-2.5 border-r-2 border-black">Host</th>
+                    <th className="p-2.5 border-r-2 border-black">DNS</th>
+                    <th className="p-2.5">Behavior</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y-2 divide-black bg-white dark:bg-[#1A1A1A] text-black dark:text-white">
+                  <tr>
+                    <td className="p-2.5 font-bold border-r-2 border-black break-all">neoip.rosentreter.site</td>
+                    <td className="p-2.5 border-r-2 border-black font-sans">A + AAAA</td>
+                    <td className="p-2.5 font-sans">IP the connection actually used (Happy Eyeballs)</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2.5 font-bold border-r-2 border-black break-all">ipv4.neoip.rosentreter.site</td>
+                    <td className="p-2.5 border-r-2 border-black font-sans">A 45.137.68.45 (no AAAA)</td>
+                    <td className="p-2.5 font-sans">IPv4 only</td>
+                  </tr>
+                  <tr>
+                    <td className="p-2.5 font-bold border-r-2 border-black break-all">ipv6.neoip.rosentreter.site</td>
+                    <td className="p-2.5 border-r-2 border-black font-sans">AAAA 2a06:de00:401:909b::1 (no A)</td>
+                    <td className="p-2.5 font-sans">IPv6 only</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div className="relative">
+              <pre className="bg-[#18181B] text-[#00FF66] p-3.5 sm:p-4 font-mono text-xs md:text-sm overflow-x-auto border-3 border-black">{`# Self-lookup — connection family depends on DNS
+curl https://neoip.rosentreter.site/api/
+curl https://ipv4.neoip.rosentreter.site/api/
+curl https://ipv6.neoip.rosentreter.site/api/
+
+# Lookup a specific IP
+curl https://neoip.rosentreter.site/api/8.8.8.8`}</pre>
+              <button
+                type="button"
+                onClick={() => {
+                  onCopy(
+                    [
+                      'curl https://neoip.rosentreter.site/api/',
+                      'curl https://ipv4.neoip.rosentreter.site/api/',
+                      'curl https://ipv6.neoip.rosentreter.site/api/',
+                      'curl https://neoip.rosentreter.site/api/8.8.8.8',
+                    ].join('\n'),
+                    'curl examples'
+                  );
+                  setCopiedCode(true);
+                  setTimeout(() => setCopiedCode(false), 2000);
+                }}
+                className="mt-2 sm:mt-0 sm:absolute sm:top-3 sm:right-3 neo-btn bg-[#FFE600] dark:bg-[#CCB800] text-black dark:text-white px-3 py-2 min-h-[44px] text-xs font-black flex items-center justify-center gap-1.5 w-full sm:w-auto"
+              >
+                {copiedCode ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
+                {copiedCode ? 'COPIED' : 'COPY CURL'}
+              </button>
+            </div>
+
+            {/* Your IPv4 / IPv6 via family-specific hosts */}
+            <div className="neo-box bg-[#FFFDF5] dark:bg-[#2A2A2A] p-3.5 grid grid-cols-1 sm:grid-cols-2 gap-3 transition-colors duration-200">
+              <div className="space-y-1">
+                <div className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-400">Your IPv4</div>
+                <div className="font-mono text-sm font-bold text-black dark:text-white break-all">
+                  {familyIps.loading ? '…' : familyIps.ipv4 ?? 'not available'}
+                </div>
+                <div className="text-[10px] font-mono text-gray-500 dark:text-gray-400 break-all">
+                  {API_HOSTS.ipv4}/api/
+                </div>
+              </div>
+              <div className="space-y-1">
+                <div className="text-[10px] font-black uppercase text-gray-600 dark:text-gray-400">Your IPv6</div>
+                <div className="font-mono text-sm font-bold text-black dark:text-white break-all">
+                  {familyIps.loading ? '…' : familyIps.ipv6 ?? 'not available'}
+                </div>
+                <div className="text-[10px] font-mono text-gray-500 dark:text-gray-400 break-all">
+                  {API_HOSTS.ipv6}/api/
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Endpoint Specification Table */}
           <div className="space-y-3">
             <h3 className="text-sm font-black uppercase text-black dark:text-white flex items-center gap-2">
